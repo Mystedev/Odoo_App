@@ -1,5 +1,8 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:odooapp/widgets/apiProducts.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class MyEmployees extends StatefulWidget {
   const MyEmployees({super.key});
@@ -220,16 +223,38 @@ class _MyEmployeesState extends State<MyEmployees> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.deepPurple,
-        elevation: 6,
-        foregroundColor: Colors.white,
-        onPressed: () => _showAddContactDialog(context), // Llama al diálogo
-        child: const Icon(
-          Icons.add,
-          weight: 200,
-          size: 30,
-        ),
+      floatingActionButton: SpeedDial(
+        icon: Icons.lens_blur,
+        activeIcon: Icons.close,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.deepPurple,
+        buttonSize: const Size(20, 60),
+        visible: true,
+        curve: Curves.bounceIn,
+        children: [
+          SpeedDialChild(
+            child: const Icon(Icons.person_add,color: Colors.deepPurple,),
+            backgroundColor: Colors.white,
+            label: 'Add',
+            onTap: () => _showAddContactDialog(context),
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.delete,color: Colors.deepPurple,),
+            backgroundColor: Colors.white,
+            label: 'Delete',
+            onTap: (){
+
+            }
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.manage_accounts,color: Colors.deepPurple,),
+            backgroundColor: Colors.white,
+            label: 'Update contact',
+            onTap: () {
+              
+            },
+          ),
+        ],
       ),
     );
   }
