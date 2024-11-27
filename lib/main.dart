@@ -75,12 +75,12 @@ class HomeScreen extends StatelessWidget {
                       width: 50,
                       child: ElevatedButton(
                         style: ButtonStyle(
+                          elevation: const WidgetStatePropertyAll(10),
                           foregroundColor: WidgetStateProperty.all(
-                              isDarkMode ? Colors.black : Colors.white),
-                          backgroundColor: WidgetStateProperty.all(
-                              isDarkMode
-                                  ? const Color.fromARGB(255, 255, 255, 255)
-                                  : const Color.fromARGB(255, 80, 2, 133)),
+                              isDarkMode ? Colors.black : Colors.deepPurple),
+                          backgroundColor: WidgetStateProperty.all(isDarkMode
+                              ? const Color.fromARGB(255, 255, 255, 255)
+                              : const Color.fromARGB(255, 255, 255, 255)),
                         ),
                         onPressed: () {
                           Navigator.of(context)
@@ -91,7 +91,8 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             Text(
                               'Products',
-                              style: TextStyle(fontSize: 24),
+                              style: TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.w700),
                             ),
                             Icon(Icons.shopping_cart),
                           ],
@@ -103,12 +104,12 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(
                     child: ElevatedButton(
                       style: ButtonStyle(
+                        elevation: const WidgetStatePropertyAll(10),
                         foregroundColor: WidgetStateProperty.all(
-                            isDarkMode ? Colors.black : Colors.white),
-                        backgroundColor: WidgetStateProperty.all(
-                            isDarkMode
-                                ? const Color.fromARGB(255, 255, 255, 255)
-                                : const Color.fromARGB(255, 80, 2, 133)),
+                            isDarkMode ? Colors.black : Colors.deepPurple),
+                        backgroundColor: WidgetStateProperty.all(isDarkMode
+                            ? const Color.fromARGB(255, 255, 255, 255)
+                            : const Color.fromARGB(255, 255, 255, 255)),
                       ),
                       onPressed: () {
                         Navigator.of(context)
@@ -119,7 +120,8 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Employees',
-                            style: TextStyle(fontSize: 24),
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.w700),
                           ),
                           Icon(Icons.person),
                         ],
@@ -148,8 +150,8 @@ Route _createRoute(Widget page) {
       const begin = Offset(1.0, 0.0);
       const end = Offset.zero;
 
-      var tween = Tween(begin: begin, end: end)
-          .chain(CurveTween(curve: Curves.easeIn));
+      var tween =
+          Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.easeIn));
       var offsetAnimation = animation.drive(tween);
 
       return SlideTransition(
