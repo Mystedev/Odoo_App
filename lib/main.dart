@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:odooapp/routes/employees.dart';
 import 'package:odooapp/routes/products.dart';
 import 'package:odooapp/themes/theme.dart';
+import 'package:odooapp/routes/comandes.dart';
 
 void main() {
   runApp(const MainApp());
@@ -58,15 +59,12 @@ class HomeScreen extends StatelessWidget {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  Text(
+                  const Text(
                     'Odoo DB',
                     style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w700,
-                      color: isDarkMode
-                          ? Colors.white
-                          : const Color.fromARGB(255, 80, 2, 133),
-                    ),
+                        fontSize: 40,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.deepPurple),
                   ),
                   const SizedBox(
                     height: 30,
@@ -74,14 +72,6 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(
                       width: 50,
                       child: ElevatedButton(
-                        style: ButtonStyle(
-                          elevation: const WidgetStatePropertyAll(10),
-                          foregroundColor: WidgetStateProperty.all(
-                              isDarkMode ? Colors.black : Colors.deepPurple),
-                          backgroundColor: WidgetStateProperty.all(isDarkMode
-                              ? const Color.fromARGB(255, 255, 255, 255)
-                              : const Color.fromARGB(255, 255, 255, 255)),
-                        ),
                         onPressed: () {
                           Navigator.of(context)
                               .push(_createRoute(const MyProducts()));
@@ -94,7 +84,7 @@ class HomeScreen extends StatelessWidget {
                               style: TextStyle(
                                   fontSize: 24, fontWeight: FontWeight.w700),
                             ),
-                            Icon(Icons.shopping_cart),
+                            Icon(Icons.shop),
                           ],
                         ),
                       )),
@@ -103,14 +93,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                   SizedBox(
                     child: ElevatedButton(
-                      style: ButtonStyle(
-                        elevation: const WidgetStatePropertyAll(10),
-                        foregroundColor: WidgetStateProperty.all(
-                            isDarkMode ? Colors.black : Colors.deepPurple),
-                        backgroundColor: WidgetStateProperty.all(isDarkMode
-                            ? const Color.fromARGB(255, 255, 255, 255)
-                            : const Color.fromARGB(255, 255, 255, 255)),
-                      ),
                       onPressed: () {
                         Navigator.of(context)
                             .push(_createRoute(const MyEmployees()));
@@ -127,6 +109,27 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  SizedBox(
+                    child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context)
+                              .push(_createRoute(const MySalesOdoo()));
+                        },
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              'Comandes',
+                              style: TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.w700),
+                            ),
+                            Icon(Icons.shopping_cart),
+                          ],
+                        )),
                   )
                 ],
               )),
@@ -135,8 +138,6 @@ class HomeScreen extends StatelessWidget {
           onPressed: () {
             onThemeChanged(!isDarkMode);
           },
-          backgroundColor: isDarkMode ? Colors.white : Colors.deepPurpleAccent,
-          foregroundColor: isDarkMode ? Colors.deepPurpleAccent : Colors.white,
           child: Icon(
               isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
         ));

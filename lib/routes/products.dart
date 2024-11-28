@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
-import 'package:odooapp/widgets/apiProducts.dart';
+import 'package:odooapp/api/apiAccessOdoo.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class MyProducts extends StatefulWidget {
   const MyProducts({super.key});
@@ -70,7 +73,8 @@ class _MyProductsState extends State<MyProducts> {
             ElevatedButton(
               onPressed: () async {
                 final name = nameController.text.trim();
-                final listPrice = double.tryParse(listPriceController.text.trim());
+                final listPrice =
+                    double.tryParse(listPriceController.text.trim());
                 final cost = double.tryParse(costController.text.trim());
 
                 if (name.isEmpty || listPrice == null || cost == null) {
@@ -110,6 +114,288 @@ class _MyProductsState extends State<MyProducts> {
     );
   }
 
+  void _showDeleteProductDialog(BuildContext context) async {
+    try {
+      final products = await ApiFetch.fetchProducts(); // Obtener productos
+
+      if (products.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No products found to delete.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      String? selectedProductName;
+      int? selectedProductId;
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: const Text('Select Product to Delete'),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return ListTile(
+                        title: Text(product['name'] ?? 'No Name'),
+                        onTap: () {
+                          setState(() {
+                            selectedProductName = product['name'];
+                            selectedProductId = product['id'];
+                          });
+                        },
+                        selected: selectedProductId == product['id'],
+                        selectedTileColor: Colors.deepPurple.withOpacity(0.1),
+                      );
+                    },
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Cerrar el diálogo
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (selectedProductId == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select a product to delete.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      try {
+                        await ApiFetch.deleteProducts([selectedProductId!]);
+                        Navigator.pop(context); // Cerrar el diálogo
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Product "$selectedProductName" deleted successfully!'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to delete product: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text('Delete'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error fetching products: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _showUpdateProductDialog(BuildContext context) async {
+    try {
+      final products = await ApiFetch.fetchProducts(); // Obtener productos
+
+      if (products.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No products found to update.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      String? selectedProductName;
+      int? selectedProductId;
+      double? initialListPrice;
+      double? initialCost;
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: const Text('Select Product to Update'),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return ListTile(
+                        title: Text(product['name'] ?? 'No Name'),
+                        onTap: () {
+                          setState(() {
+                            selectedProductName = product['name'];
+                            selectedProductId = product['id'];
+                            initialListPrice = product['list_price'] ?? 0.0;
+                            initialCost = product['standard_price'] ?? 0.0;
+                          });
+                        },
+                        selected: selectedProductId == product['id'],
+                        selectedTileColor: Colors.deepPurple.withOpacity(0.1),
+                      );
+                    },
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Cerrar el diálogo
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (selectedProductId == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select a product to update.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      Navigator.pop(context); // Cerrar selección
+                      _showEditProductDialog(
+                        context,
+                        selectedProductId!,
+                        selectedProductName!,
+                        initialListPrice ?? 0.0,
+                        initialCost ?? 0.0,
+                      );
+                    },
+                    child: const Text('Next'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error fetching products: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _showEditProductDialog(BuildContext context, int productId, String initialName, double initialListPrice, double initialCost) {
+  final nameController = TextEditingController(text: initialName);
+  final listPriceController = TextEditingController(text: initialListPrice.toString());
+  final costController = TextEditingController(text: initialCost.toString());
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Update Product Details'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Product Name'),
+              ),
+              TextField(
+                controller: listPriceController,
+                decoration: const InputDecoration(labelText: 'Sales Price'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: costController,
+                decoration: const InputDecoration(labelText: 'Cost Price'),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Cerrar el cuadro de diálogo
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final name = nameController.text.trim();
+              final listPrice = double.tryParse(listPriceController.text.trim());
+              final cost = double.tryParse(costController.text.trim());
+
+              if (name.isEmpty || listPrice == null || cost == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('All fields are required and must be valid!'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              try {
+                await ApiFetch.updateProduct(productId, {
+                  "name": name,
+                  "list_price": listPrice,
+                  "standard_price": cost,
+                });
+                Navigator.pop(context); // Cerrar el cuadro de diálogo
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Product updated successfully!'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                fetchApi(); // Recargar la lista de productos
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Failed to update product: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,7 +403,8 @@ class _MyProductsState extends State<MyProducts> {
         title: const Text('My Products'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.replay_outlined, color: Colors.white, size: 30),
+            icon: const Icon(Icons.replay_outlined,
+                color: Colors.white, size: 30),
             onPressed: () => fetchApi(), // Recargar la lista de productos
           ),
           const SizedBox(width: 20),
@@ -143,6 +430,7 @@ class _MyProductsState extends State<MyProducts> {
           // Mostrar la lista de productos
           final products = snapshot.data!;
           return ListView.builder(
+            padding: const EdgeInsets.all(14),
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index];
@@ -198,10 +486,10 @@ class _MyProductsState extends State<MyProducts> {
                                   alignment: Alignment.centerRight,
                                   child: ElevatedButton(
                                     style: const ButtonStyle(
-                                      foregroundColor: WidgetStatePropertyAll(
-                                          Colors.white),
-                                      backgroundColor: WidgetStatePropertyAll(
-                                          Colors.black),
+                                      foregroundColor:
+                                          WidgetStatePropertyAll(Colors.white),
+                                      backgroundColor:
+                                          WidgetStatePropertyAll(Colors.black),
                                     ),
                                     onPressed: () {
                                       Navigator.pop(context);
@@ -229,16 +517,42 @@ class _MyProductsState extends State<MyProducts> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.deepPurple,
-        elevation: 6,
-        foregroundColor: Colors.white,
-        onPressed: () => _showAddProductDialog(context), // Llama al diálogo
-        child: const Icon(
-          Icons.add,
-          weight: 200,
-          size: 30,
-        ),
+      floatingActionButton: SpeedDial(
+        icon: Icons.more_horiz,
+        activeIcon: Icons.close,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.deepPurple,
+        buttonSize: const Size(20, 60),
+        visible: true,
+        curve: Curves.bounceIn,
+        children: [
+          SpeedDialChild(
+            child: const Icon(
+              Icons.add_shopping_cart,
+              color: Colors.deepPurple,
+            ),
+            backgroundColor: Colors.white,
+            label: 'Add',
+            onTap: () => _showAddProductDialog(context),
+          ),
+          SpeedDialChild(
+              child: const Icon(
+                Icons.remove_shopping_cart,
+                color: Colors.deepPurple,
+              ),
+              backgroundColor: Colors.white,
+              label: 'Delete',
+              onTap: () => _showDeleteProductDialog(context)),
+          SpeedDialChild(
+            child: const Icon(
+              Icons.manage_history,
+              color: Colors.deepPurple,
+            ),
+            backgroundColor: Colors.white,
+            label: 'Update product',
+            onTap: () => _showUpdateProductDialog(context),
+          ),
+        ],
       ),
     );
   }

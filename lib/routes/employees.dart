@@ -1,8 +1,9 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, non_constant_identifier_names, unused_element, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:odooapp/widgets/apiProducts.dart';
+import 'package:odooapp/api/apiAccessOdoo.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:odooapp/utilities/dialog_helpers.dart';
 
 class MyEmployees extends StatefulWidget {
   const MyEmployees({super.key});
@@ -32,16 +33,112 @@ class _MyEmployeesState extends State<MyEmployees> {
     });
   }
 
-  void _showAddContactDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    final emailController = TextEditingController();
-    final phoneController = TextEditingController();
+  void _showUpdateContactDialog(BuildContext context) async {
+    try {
+      final contacts = await fetchContacts(); // Obtén la lista de contactos
+
+      if (contacts.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No contacts found to update.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      String? selectedContactName;
+      int? selectedContactId;
+      String? initialEmail;
+      String? initialPhone;
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: const Text('Select Contact to Update'),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: contacts.length,
+                    itemBuilder: (context, index) {
+                      final contact = contacts[index];
+                      return ListTile(
+                        title: Text(contact['name'] ?? 'No Name'),
+                        onTap: () {
+                          setState(() {
+                            selectedContactName = contact['name'];
+                            selectedContactId = contact['id'];
+                            initialEmail = contact['email'];
+                            initialPhone = contact['phone'];
+                          });
+                        },
+                        selected: selectedContactId == contact['id'],
+                        selectedTileColor: Colors.deepPurple.withOpacity(0.1),
+                      );
+                    },
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Cerrar el diálogo
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (selectedContactId == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select a contact to update.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      Navigator.pop(context); // Cierra selección de contacto
+                      _showEditContactDialog(
+                        context,
+                        selectedContactId!,
+                        selectedContactName!,
+                        initialEmail ?? '',
+                        initialPhone ?? '',
+                      );
+                    },
+                    child: const Text('Next'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error fetching contacts: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _showEditContactDialog(BuildContext context, int contactId,
+      String initialName, String initialEmail, String initialPhone) {
+    final nameController = TextEditingController(text: initialName);
+    final emailController = TextEditingController(text: initialEmail);
+    final phoneController = TextEditingController(text: initialPhone);
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Add New Contact'),
+          title: const Text('Update Contact Details'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -85,25 +182,29 @@ class _MyEmployeesState extends State<MyEmployees> {
                 }
 
                 try {
-                  await ApiFetch.addContact(name, email, phone);
+                  await ApiFetch.updateContact(contactId, {
+                    "name": name,
+                    "email": email,
+                    "phone": phone,
+                  });
                   Navigator.pop(context); // Cerrar el cuadro de diálogo
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Contact added successfully!'),
+                      content: Text('Contact updated successfully!'),
                       backgroundColor: Colors.green,
                     ),
                   );
-                  fetchApi(); // Recargar la lista después de agregar un nuevo contacto
+                  fetchApi(); // Recargar la lista después de actualizar
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to add contact: $e'),
+                      content: Text('Failed to update contact: $e'),
                       backgroundColor: Colors.red,
                     ),
                   );
                 }
               },
-              child: const Text('Add'),
+              child: const Text('Update'),
             ),
           ],
         );
@@ -118,7 +219,8 @@ class _MyEmployeesState extends State<MyEmployees> {
         title: const Text('Employees List'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.replay_outlined, color: Colors.white, size: 30),
+            icon: const Icon(Icons.replay_outlined,
+                color: Colors.white, size: 30),
             onPressed: () => fetchApi(), // Recargar la lista de contactos
           ),
           const SizedBox(width: 20),
@@ -144,6 +246,8 @@ class _MyEmployeesState extends State<MyEmployees> {
           // Mostrar la lista de contactos
           final contacts = snapshot.data!;
           return ListView.builder(
+            padding: const EdgeInsets.all(14),
+            shrinkWrap: true,
             itemCount: contacts.length,
             itemBuilder: (context, index) {
               final contact = contacts[index];
@@ -194,10 +298,10 @@ class _MyEmployeesState extends State<MyEmployees> {
                                   alignment: Alignment.centerRight,
                                   child: ElevatedButton(
                                     style: const ButtonStyle(
-                                      foregroundColor: WidgetStatePropertyAll(
-                                          Colors.white),
-                                      backgroundColor: WidgetStatePropertyAll(
-                                          Colors.black),
+                                      foregroundColor:
+                                          WidgetStatePropertyAll(Colors.white),
+                                      backgroundColor:
+                                          WidgetStatePropertyAll(Colors.black),
                                     ),
                                     onPressed: () {
                                       Navigator.pop(context);
@@ -224,36 +328,40 @@ class _MyEmployeesState extends State<MyEmployees> {
         },
       ),
       floatingActionButton: SpeedDial(
-        icon: Icons.lens_blur,
+        icon: Icons.more_horiz,
         activeIcon: Icons.close,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.deepPurple,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        foregroundColor: const Color.fromARGB(255, 119, 83, 158),
         buttonSize: const Size(20, 60),
         visible: true,
         curve: Curves.bounceIn,
         children: [
           SpeedDialChild(
-            child: const Icon(Icons.person_add,color: Colors.deepPurple,),
+            child: const Icon(
+              Icons.person_add,
+              color: Colors.deepPurple,
+            ),
             backgroundColor: Colors.white,
             label: 'Add',
-            onTap: () => _showAddContactDialog(context),
+            onTap: () => DialogHelpers.showAddContactDialog(context, fetchApi),
           ),
           SpeedDialChild(
-            child: const Icon(Icons.delete,color: Colors.deepPurple,),
-            backgroundColor: Colors.white,
-            label: 'Delete',
-            onTap: (){
-
-            }
-          ),
+              child: const Icon(
+                Icons.no_accounts_sharp,
+                color: Colors.deepPurple,
+              ),
+              backgroundColor: Colors.white,
+              label: 'Delete',
+              onTap: () => DialogHelpers.showDeleteContactDialog(
+                  context, fetchContacts, fetchApi)),
           SpeedDialChild(
-            child: const Icon(Icons.manage_accounts,color: Colors.deepPurple,),
-            backgroundColor: Colors.white,
-            label: 'Update contact',
-            onTap: () {
-              
-            },
-          ),
+              child: const Icon(
+                Icons.manage_accounts,
+                color: Colors.deepPurple,
+              ),
+              backgroundColor: Colors.white,
+              label: 'Update contact',
+              onTap: () => _showUpdateContactDialog(context)),
         ],
       ),
     );
