@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:odooapp/routes/employees.dart';
 import 'package:odooapp/routes/products.dart';
@@ -51,96 +49,85 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : const Color(0xFF004C6E);
 
     return Scaffold(
-        body: Center(
-          child: SizedBox(
-              width: 250,
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  const Text(
-                    'Odoo DB',
-                    style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.deepPurple),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  SizedBox(
-                      width: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context)
-                              .push(_createRoute(const MyProducts()));
-                        },
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              'Products',
-                              style: TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.w700),
-                            ),
-                            Icon(Icons.shop),
-                          ],
-                        ),
-                      )),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  SizedBox(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context)
-                            .push(_createRoute(const MyEmployees()));
-                      },
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text(
-                            'Employees',
-                            style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.w700),
-                          ),
-                          Icon(Icons.person),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  SizedBox(
-                    child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context)
-                              .push(_createRoute(const MySalesOdoo()));
-                        },
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              'Comandes',
-                              style: TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.w700),
-                            ),
-                            Icon(Icons.shopping_cart),
-                          ],
-                        )),
-                  )
-                ],
-              )),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {
+              onThemeChanged(!isDarkMode);
+            },
+            icon: Icon(
+              isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              color: isDarkMode ? Colors.white : const Color(0xFF004C6E),
+            ),
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: isDarkMode ? const Color(0xFF00344D) : const Color(0xFF004C6E),
+              ),
+              child: const Text(
+                'Odoo App',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.shop),
+              title: const Text('Products'),
+              onTap: () {
+                Navigator.of(context).push(_createRoute(const MyProducts()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Employees'),
+              onTap: () {
+                Navigator.of(context).push(_createRoute(const MyEmployees()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.shopping_cart),
+              title: const Text('Comandes'),
+              onTap: () {
+                Navigator.of(context).push(_createRoute(const MySalesOdoo()));
+              },
+            ),
+          ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            onThemeChanged(!isDarkMode);
-          },
-          child: Icon(
-              isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
-        ));
+      ),
+      body: Stack(
+        children: [
+          /*Positioned.fill(
+            child: Image.asset(
+              'assets/your_image.png', // Coloca tu imagen de fondo aquí
+              fit: BoxFit.cover,
+            ),
+          ),*/
+          Center(
+            child: Text(
+              'Odoo DB',
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -148,15 +135,8 @@ Route _createRoute(Widget page) {
   return PageRouteBuilder(
     pageBuilder: (context, animation, secondaryAnimation) => page,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(1.0, 0.0);
-      const end = Offset.zero;
-
-      var tween =
-          Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.easeIn));
-      var offsetAnimation = animation.drive(tween);
-
-      return SlideTransition(
-        position: offsetAnimation,
+      return FadeTransition(
+        opacity: animation,
         child: child,
       );
     },

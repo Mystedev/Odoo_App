@@ -419,7 +419,7 @@ class _MyProductsState extends State<MyProducts> {
             );
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}'), // Mostrar errores
+              child: Text('Error 1: ${snapshot.error}'), // Mostrar errores
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(

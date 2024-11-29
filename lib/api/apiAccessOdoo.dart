@@ -223,6 +223,7 @@ class ApiFetch {
           "model": "product.product", // Modelo de productos en Odoo
           "method": "search_read",
           "args": [],
+          "limit":5,
           "kwargs": {
             "fields": [
               "id",
