@@ -521,7 +521,7 @@ class _MyProductsState extends State<MyProducts> {
         icon: Icons.more_horiz,
         activeIcon: Icons.close,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.deepPurple,
+        foregroundColor: const Color(0xFF004C6E),
         buttonSize: const Size(20, 60),
         visible: true,
         curve: Curves.bounceIn,
@@ -529,7 +529,7 @@ class _MyProductsState extends State<MyProducts> {
           SpeedDialChild(
             child: const Icon(
               Icons.add_shopping_cart,
-              color: Colors.deepPurple,
+              color: Color(0xFF004C6E),
             ),
             backgroundColor: Colors.white,
             label: 'Add',
@@ -538,7 +538,7 @@ class _MyProductsState extends State<MyProducts> {
           SpeedDialChild(
               child: const Icon(
                 Icons.remove_shopping_cart,
-                color: Colors.deepPurple,
+                color: Color(0xFF004C6E),
               ),
               backgroundColor: Colors.white,
               label: 'Delete',
@@ -546,7 +546,7 @@ class _MyProductsState extends State<MyProducts> {
           SpeedDialChild(
             child: const Icon(
               Icons.manage_history,
-              color: Colors.deepPurple,
+              color: Color(0xFF004C6E),
             ),
             backgroundColor: Colors.white,
             label: 'Update product',

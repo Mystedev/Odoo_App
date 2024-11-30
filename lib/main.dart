@@ -1,8 +1,11 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:odooapp/routes/employees.dart';
 import 'package:odooapp/routes/products.dart';
 import 'package:odooapp/themes/theme.dart';
 import 'package:odooapp/routes/comandes.dart';
+import 'package:odooapp/widgets/albaranesScreen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -53,7 +56,6 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
@@ -62,7 +64,7 @@ class HomeScreen extends StatelessWidget {
             },
             icon: Icon(
               isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-              color: isDarkMode ? Colors.white : const Color(0xFF004C6E),
+              color: isDarkMode ? Colors.white : Colors.white,
             ),
           ),
         ],
@@ -72,17 +74,22 @@ class HomeScreen extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: isDarkMode ? const Color(0xFF00344D) : const Color(0xFF004C6E),
-              ),
-              child: const Text(
-                'Odoo App',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
+                decoration: BoxDecoration(
+                  color: isDarkMode
+                      ? const Color(0xFF00344D)
+                      : const Color(0xFF004C6E),
                 ),
-              ),
-            ),
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Odoo DB',
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
+                    ),
+                    Icon(Icons.dashboard,size: 50,color: Colors.white,)
+                  ],
+                )),
             ListTile(
               leading: const Icon(Icons.shop),
               title: const Text('Products'),
@@ -101,20 +108,15 @@ class HomeScreen extends StatelessWidget {
               leading: const Icon(Icons.shopping_cart),
               title: const Text('Comandes'),
               onTap: () {
-                Navigator.of(context).push(_createRoute(const MySalesOdoo()));
+                Navigator.of(context).push(_createRoute(const AlbaranesScreen()));
               },
             ),
           ],
         ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          /*Positioned.fill(
-            child: Image.asset(
-              'assets/your_image.png', // Coloca tu imagen de fondo aquí
-              fit: BoxFit.cover,
-            ),
-          ),*/
+          Image.asset("lib/assets/rb_2149227348.png"),
           Center(
             child: Text(
               'Odoo DB',
@@ -125,6 +127,14 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 200,),
+          Container(
+            child: Text('Dashboard',style: TextStyle(
+              color: isDarkMode ? Colors.white : const Color.fromARGB(255, 0, 34, 58), 
+              fontSize: 30,
+              fontWeight: FontWeight.bold
+            ),),
+          )
         ],
       ),
     );

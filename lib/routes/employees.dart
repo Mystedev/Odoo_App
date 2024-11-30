@@ -331,7 +331,7 @@ class _MyEmployeesState extends State<MyEmployees> {
         icon: Icons.more_horiz,
         activeIcon: Icons.close,
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        foregroundColor: const Color.fromARGB(255, 119, 83, 158),
+        foregroundColor: const Color(0xFF004C6E),
         buttonSize: const Size(20, 60),
         visible: true,
         curve: Curves.bounceIn,
@@ -339,7 +339,7 @@ class _MyEmployeesState extends State<MyEmployees> {
           SpeedDialChild(
             child: const Icon(
               Icons.person_add,
-              color: Colors.deepPurple,
+              color: Color(0xFF004C6E),
             ),
             backgroundColor: Colors.white,
             label: 'Add',
@@ -348,7 +348,7 @@ class _MyEmployeesState extends State<MyEmployees> {
           SpeedDialChild(
               child: const Icon(
                 Icons.no_accounts_sharp,
-                color: Colors.deepPurple,
+                color: Color(0xFF004C6E),
               ),
               backgroundColor: Colors.white,
               label: 'Delete',
@@ -357,7 +357,7 @@ class _MyEmployeesState extends State<MyEmployees> {
           SpeedDialChild(
               child: const Icon(
                 Icons.manage_accounts,
-                color: Colors.deepPurple,
+                color: Color(0xFF004C6E),
               ),
               backgroundColor: Colors.white,
               label: 'Update contact',

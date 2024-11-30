@@ -25,12 +25,10 @@ class _MySalesOdooState extends State<MySalesOdoo> {
       appBar: AppBar(
         title: const Text('Nuevo Albarán'),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          // Contenido desplazable
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 80), // Espacio para el botón
-            child: Padding(
+          Expanded(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,54 +69,57 @@ class _MySalesOdooState extends State<MySalesOdoo> {
                   ),
                   const SizedBox(height: 10),
                   _buildProductForm(),
-                  const SizedBox(height: 20),
-                  if (_products.isNotEmpty) _buildProductList() else const Text('No hay productos añadidos aún.'),
+                  const Divider(color: Colors.black),
+                  if (_products.isNotEmpty)
+                    _buildProductList()
+                  else
+                    const Text('No hay productos añadidos aún.'),
                   const SizedBox(height: 20),
                 ],
               ),
             ),
           ),
-
-          // Elemento fijo en la parte inferior
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: const Color.fromARGB(255, 88, 174, 205), // Fondo semitransparente
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Total
-                  Text(
-                    'Total: \$$_totalAmount',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  
-                  // Botón personalizado
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00344D), // Fondo personalizado
-                      foregroundColor: Colors.white, // Texto personalizado
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: _submitAlbaran,
-                    child: const Row(
-                      children: [
-                        Icon(Icons.send, size: 16),
-                        SizedBox(width: 8),
-                        Text('Enviar'),
-                      ],
-                    ),
-                  ),
-                ],
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(255, 11, 61, 79),
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20),
+                topLeft: Radius.circular(20),
               ),
             ),
-          ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total: \$$_totalAmount',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 2, 42, 61),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                  ),
+                  onPressed: _submitAlbaran,
+                  child: const Row(
+                    children: [
+                      Icon(Icons.send, size: 16),
+                      SizedBox(width: 8),
+                      Text('Enviar'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );
@@ -179,13 +180,46 @@ class _MySalesOdooState extends State<MySalesOdoo> {
           margin: const EdgeInsets.symmetric(vertical: 5),
           child: ListTile(
             title: Text(product['name']),
-            subtitle: Text('Cantidad: ${product['quantity']}, Precio: \$${product['unitPrice']}'),
+            subtitle: Text(
+                'Cantidad: ${product['quantity']}, Precio: \$${product['unitPrice']}'),
             trailing: Text('Total: \$${product['total']}'),
             leading: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _removeProduct(product),
+              onPressed: () => _showDeleteConfirmationDialog(product),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmationDialog(Map<String, dynamic> product) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar eliminación'),
+          content: Text(
+              '¿Estás seguro de que deseas eliminar el producto "${product['name']}"?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                _removeProduct(product);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Eliminar'),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
         );
       },
     );
@@ -214,7 +248,9 @@ class _MySalesOdooState extends State<MySalesOdoo> {
       _quantityController.clear();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, llena todos los campos del producto correctamente.')),
+        const SnackBar(
+          content: Text('Por favor, llena todos los campos del producto correctamente.'),
+        ),
       );
     }
   }
@@ -238,12 +274,15 @@ class _MySalesOdooState extends State<MySalesOdoo> {
       return;
     }
 
-    print('Albarán enviado con éxito:');
-    print('Contacto: $contact');
-    print('Fecha: $date');
-    print('NRT: $nrt');
-    print('Productos: $_products');
-    print('Total: $_totalAmount');
+    final newAlbaran = {
+      'contact': contact,
+      'date': date,
+      'nrt': nrt,
+      'products': _products,
+      'total': _totalAmount,
+    };
+
+    Navigator.pop(context, newAlbaran); // Devuelve el albarán a la pantalla principal
 
     setState(() {
       _contactController.clear();
@@ -254,7 +293,10 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Albarán enviado con éxito.')),
+      const SnackBar(content: Text('Albarán enviado con éxito.')),snackBarAnimationStyle: AnimationStyle(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      )
     );
   }
 }
