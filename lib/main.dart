@@ -61,12 +61,14 @@ class AuthenticatedHomeScreen extends StatelessWidget {
           );
         } else if (snapshot.hasError) {
           // En lugar de bloquear, permitir acceso mostrando un mensaje
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error en la autenticación: ${snapshot.error}. Acceso en modo limitado.'),
-              backgroundColor: Colors.orange,
-            ),
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error en la autenticación: ${snapshot.error}. Acceso en modo limitado.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          });
         }
 
         // Autenticación exitosa o con error, se sigue mostrando el HomeScreen
@@ -133,7 +135,7 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.person),
-              title: const Text('Employees'),
+              title: const Text('Contacts'),
               onTap: () {
                 Navigator.of(context).push(_createRoute(const MyEmployees()));
               },
@@ -182,13 +184,7 @@ class HomeScreen extends StatelessWidget {
 }
 
 Route _createRoute(Widget page) {
-  return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => page,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return FadeTransition(
-        opacity: animation,
-        child: child,
-      );
-    },
+  return MaterialPageRoute(
+    builder: (context) => page,
   );
 }

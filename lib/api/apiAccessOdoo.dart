@@ -520,49 +520,6 @@ class ApiFetch {
       throw Exception('Error al obtener ventas: ${response.statusCode}');
     }
   }
-
-    // Crear una nueva orden de venta
-  static Future<void> addSaleOrder(int partnerId, List<Map<String, dynamic>> orderLines) async {
-    final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': 'session_id=$sessionId',
-      },
-      body: jsonEncode({
-        "jsonrpc": "2.0",
-        "method": "call",
-        "params": {
-          "model": "sale.order", // Modelo de órdenes de venta
-          "method": "create",
-          "args": [
-            {
-              "partner_id": partnerId, // ID del cliente
-              "order_line": orderLines, // Líneas de orden (productos y cantidades)
-            }
-          ],
-          "kwargs": {},
-        },
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['result'] != null) {
-        print('Orden de venta añadida con éxito, ID: ${data['result']}');
-      } else {
-        print('Error al añadir la orden de venta: ${response.body}');
-        throw Exception('No se pudo añadir la orden de venta');
-      }
-    } else {
-      print('Error en la respuesta: ${response.body}');
-      throw Exception('Error al añadir la orden de venta: ${response.statusCode}');
-    }
-  }
-
-
 }
 
 

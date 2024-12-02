@@ -210,7 +210,7 @@ class _MyEmployeesState extends State<MyEmployees> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Employees List'),
+        title: const Text('Contacts List'),
         actions: [
           IconButton(
             icon: const Icon(Icons.replay_outlined,
