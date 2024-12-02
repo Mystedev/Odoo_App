@@ -207,55 +207,42 @@ class ApiFetch {
     }
   }
   // Obtener datos del módulo Inventory (Productos)
-  static Future<List<dynamic>> fetchProducts() async {
-    final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
+  static Future<List<dynamic>> fetchProducts({int offset = 0}) async {
+  final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': 'session_id=$sessionId', // Encabezado para la API key
-      },
-      body: jsonEncode({
-        "jsonrpc": "2.0",
-        "method": "call",
-        "params": {
-          "model": "product.product", // Modelo de productos en Odoo
-          "method": "search_read",
-          "args": [],
-          "limit":5,
-          "kwargs": {
-            "fields": [
-              "id",
-              "name",
-              "list_price", // Precio de venta
-              "standard_price", // Costo del producto
-            ],
-          },
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cookie': 'session_id=$sessionId', // Encabezado para la sesión
+    },
+    body: jsonEncode({
+      "jsonrpc": "2.0",
+      "method": "call",
+      "params": {
+        "model": "product.product", // Modelo de productos
+        "method": "search_read",
+        "args": [],
+        "kwargs": {
+          "fields": ["id", "name", "list_price", "standard_price"], // Campos requeridos
+          "offset": offset, // Desplazamiento para la paginación
         },
-      }),
-    );
+      },
+    }),
+  );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['result'] != null) {
-        // Modificamos para obtener el nombre de la categoría
-        var products = List<dynamic>.from(data['result']);
-        products = await Future.wait(products.map((product) async {
-          var categoryName =
-              await fetchProductCategoryName(product['categ_id']);
-          product['categ_name'] = categoryName;
-          return product;
-        }));
-        print('Productos obtenidos: $products');
-        return products;
-      } else {
-        throw Exception('No se pudieron obtener los productos');
-      }
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    if (data['result'] != null) {
+      return List<dynamic>.from(data['result']);
     } else {
-      throw Exception('Error al obtener productos: ${response.statusCode}');
+      throw Exception('No se pudieron obtener los productos');
     }
+  } else {
+    throw Exception('Error al obtener productos: ${response.statusCode}');
   }
+}
+
 
   static Future<void> addProduct(
       String name, double listPrice, double standardPrice) async {

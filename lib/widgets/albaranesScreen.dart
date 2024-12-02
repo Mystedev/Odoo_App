@@ -17,7 +17,7 @@ class _AlbaranesScreenState extends State<AlbaranesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lista de Albaranes'),
+        title: const Text('Albaranes y Ventas'),
       ),
       body: Column(
         children: [

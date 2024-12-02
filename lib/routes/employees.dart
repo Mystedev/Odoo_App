@@ -18,24 +18,18 @@ class _MyEmployeesState extends State<MyEmployees> {
   @override
   void initState() {
     super.initState();
-    _contactsFuture = fetchContacts(); // Inicializa la lista de contactos
-  }
-
-  Future<List<dynamic>> fetchContacts() async {
-    await ApiFetch.authenticate(); // Autenticación
-    return await ApiFetch.fetchContacts(); // Obtener contactos
+    _contactsFuture = ApiFetch.fetchContacts(); // Obtener contactos sin autenticar
   }
 
   Future<void> fetchApi() async {
-    await ApiFetch.authenticate(); // Autenticación
     setState(() {
-      _contactsFuture = fetchContacts(); // Recargar la lista de contactos
+      _contactsFuture = ApiFetch.fetchContacts(); // Recargar contactos
     });
   }
 
   void _showUpdateContactDialog(BuildContext context) async {
     try {
-      final contacts = await fetchContacts(); // Obtén la lista de contactos
+      final contacts = await ApiFetch.fetchContacts(); // Obtener contactos
 
       if (contacts.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -85,7 +79,7 @@ class _MyEmployeesState extends State<MyEmployees> {
                 actions: [
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context); // Cerrar el diálogo
+                      Navigator.pop(context); // Cerrar diálogo
                     },
                     child: const Text('Cancel'),
                   ),
@@ -161,7 +155,7 @@ class _MyEmployeesState extends State<MyEmployees> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Cerrar el cuadro de diálogo
+                Navigator.pop(context); // Cerrar cuadro de diálogo
               },
               child: const Text('Cancel'),
             ),
@@ -187,14 +181,14 @@ class _MyEmployeesState extends State<MyEmployees> {
                     "email": email,
                     "phone": phone,
                   });
-                  Navigator.pop(context); // Cerrar el cuadro de diálogo
+                  Navigator.pop(context); // Cerrar cuadro de diálogo
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Contact updated successfully!'),
                       backgroundColor: Colors.green,
                     ),
                   );
-                  fetchApi(); // Recargar la lista después de actualizar
+                  fetchApi(); // Recargar lista después de actualizar
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -221,7 +215,7 @@ class _MyEmployeesState extends State<MyEmployees> {
           IconButton(
             icon: const Icon(Icons.replay_outlined,
                 color: Colors.white, size: 30),
-            onPressed: () => fetchApi(), // Recargar la lista de contactos
+            onPressed: () => fetchApi(), // Recargar lista de contactos
           ),
           const SizedBox(width: 20),
         ],
@@ -243,7 +237,7 @@ class _MyEmployeesState extends State<MyEmployees> {
             );
           }
 
-          // Mostrar la lista de contactos
+          // Mostrar lista de contactos
           final contacts = snapshot.data!;
           return ListView.builder(
             padding: const EdgeInsets.all(14),
@@ -255,7 +249,7 @@ class _MyEmployeesState extends State<MyEmployees> {
                 children: [
                   InkWell(
                     onTap: () {
-                      // Mostrar el BottomSheet
+                      // Mostrar BottomSheet
                       showModalBottomSheet(
                         context: context,
                         shape: const RoundedRectangleBorder(
@@ -353,7 +347,7 @@ class _MyEmployeesState extends State<MyEmployees> {
               backgroundColor: Colors.white,
               label: 'Delete',
               onTap: () => DialogHelpers.showDeleteContactDialog(
-                  context, fetchContacts, fetchApi)),
+                  context, ApiFetch.fetchContacts, fetchApi)),
           SpeedDialChild(
               child: const Icon(
                 Icons.manage_accounts,

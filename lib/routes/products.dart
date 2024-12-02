@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
@@ -13,22 +13,16 @@ class MyProducts extends StatefulWidget {
 
 class _MyProductsState extends State<MyProducts> {
   late Future<List<dynamic>> _productsFuture;
-
+  
   @override
   void initState() {
     super.initState();
-    _productsFuture = fetchProducts(); // Inicializa la lista de productos
-  }
-
-  Future<List<dynamic>> fetchProducts() async {
-    await ApiFetch.authenticate(); // Autenticación
-    return await ApiFetch.fetchProducts(); // Obtener productos
+    _productsFuture = ApiFetch.fetchProducts(); // Cargar productos sin autenticar
   }
 
   Future<void> fetchApi() async {
-    await ApiFetch.authenticate(); // Autenticación
     setState(() {
-      _productsFuture = fetchProducts(); // Recargar la lista de productos
+      _productsFuture = ApiFetch.fetchProducts(); // Recargar productos
     });
   }
 
@@ -66,7 +60,7 @@ class _MyProductsState extends State<MyProducts> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Cerrar el cuadro de diálogo
+                Navigator.pop(context); // Cerrar diálogo
               },
               child: const Text('Cancel'),
             ),
@@ -89,14 +83,14 @@ class _MyProductsState extends State<MyProducts> {
 
                 try {
                   await ApiFetch.addProduct(name, listPrice, cost);
-                  Navigator.pop(context); // Cerrar el cuadro de diálogo
+                  Navigator.pop(context); // Cerrar diálogo
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Product added successfully!'),
                       backgroundColor: Colors.green,
                     ),
                   );
-                  fetchApi(); // Recargar la lista después de agregar un nuevo producto
+                  fetchApi(); // Recargar lista de productos
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -162,7 +156,7 @@ class _MyProductsState extends State<MyProducts> {
                 actions: [
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context); // Cerrar el diálogo
+                      Navigator.pop(context); // Cerrar diálogo
                     },
                     child: const Text('Cancel'),
                   ),
@@ -180,7 +174,7 @@ class _MyProductsState extends State<MyProducts> {
 
                       try {
                         await ApiFetch.deleteProducts([selectedProductId!]);
-                        Navigator.pop(context); // Cerrar el diálogo
+                        Navigator.pop(context); // Cerrar diálogo
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
@@ -188,6 +182,7 @@ class _MyProductsState extends State<MyProducts> {
                             backgroundColor: Colors.green,
                           ),
                         );
+                        fetchApi(); // Recargar lista de productos
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -267,7 +262,7 @@ class _MyProductsState extends State<MyProducts> {
                 actions: [
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context); // Cerrar el diálogo
+                      Navigator.pop(context); // Cerrar diálogo
                     },
                     child: const Text('Cancel'),
                   ),
@@ -310,91 +305,91 @@ class _MyProductsState extends State<MyProducts> {
     }
   }
 
-  void _showEditProductDialog(BuildContext context, int productId, String initialName, double initialListPrice, double initialCost) {
-  final nameController = TextEditingController(text: initialName);
-  final listPriceController = TextEditingController(text: initialListPrice.toString());
-  final costController = TextEditingController(text: initialCost.toString());
+  void _showEditProductDialog(BuildContext context, int productId,
+      String initialName, double initialListPrice, double initialCost) {
+    final nameController = TextEditingController(text: initialName);
+    final listPriceController = TextEditingController(text: initialListPrice.toString());
+    final costController = TextEditingController(text: initialCost.toString());
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Update Product Details'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Product Name'),
-              ),
-              TextField(
-                controller: listPriceController,
-                decoration: const InputDecoration(labelText: 'Sales Price'),
-                keyboardType: TextInputType.number,
-              ),
-              TextField(
-                controller: costController,
-                decoration: const InputDecoration(labelText: 'Cost Price'),
-                keyboardType: TextInputType.number,
-              ),
-            ],
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Update Product Details'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Product Name'),
+                ),
+                TextField(
+                  controller: listPriceController,
+                  decoration: const InputDecoration(labelText: 'Sales Price'),
+                  keyboardType: TextInputType.number,
+                ),
+                TextField(
+                  controller: costController,
+                  decoration: const InputDecoration(labelText: 'Cost Price'),
+                  keyboardType: TextInputType.number,
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Cerrar el cuadro de diálogo
-            },
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final name = nameController.text.trim();
-              final listPrice = double.tryParse(listPriceController.text.trim());
-              final cost = double.tryParse(costController.text.trim());
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Cerrar diálogo
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final name = nameController.text.trim();
+                final listPrice = double.tryParse(listPriceController.text.trim());
+                final cost = double.tryParse(costController.text.trim());
 
-              if (name.isEmpty || listPrice == null || cost == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('All fields are required and must be valid!'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
+                if (name.isEmpty || listPrice == null || cost == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('All fields are required and must be valid!'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
 
-              try {
-                await ApiFetch.updateProduct(productId, {
-                  "name": name,
-                  "list_price": listPrice,
-                  "standard_price": cost,
-                });
-                Navigator.pop(context); // Cerrar el cuadro de diálogo
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Product updated successfully!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-                fetchApi(); // Recargar la lista de productos
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Failed to update product: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: const Text('Update'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
+                try {
+                  await ApiFetch.updateProduct(productId, {
+                    "name": name,
+                    "list_price": listPrice,
+                    "standard_price": cost,
+                  });
+                  Navigator.pop(context); // Cerrar diálogo
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Product updated successfully!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  fetchApi(); // Recargar lista de productos
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to update product: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Update'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -403,115 +398,75 @@ class _MyProductsState extends State<MyProducts> {
         title: const Text('My Products'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.replay_outlined,
-                color: Colors.white, size: 30),
-            onPressed: () => fetchApi(), // Recargar la lista de productos
+            icon: const Icon(Icons.replay_outlined, color: Colors.white, size: 30),
+            onPressed: () => fetchApi(), // Recargar productos
           ),
           const SizedBox(width: 20),
         ],
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: _productsFuture, // Utiliza el future actual
+        future: _productsFuture, // Usa el future actual
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(), // Indicador de carga
-            );
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Error 1: ${snapshot.error}'), // Mostrar errores
+              child: Text('Error: ${snapshot.error}'),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text('No products found'), // Sin datos
-            );
+            return const Center(child: Text('No products found'));
           }
 
-          // Mostrar la lista de productos
           final products = snapshot.data!;
           return ListView.builder(
             padding: const EdgeInsets.all(14),
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index];
-              return Column(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      // Mostrar el BottomSheet con los detalles del producto
-                      showModalBottomSheet(
-                        context: context,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
-                        ),
-                        builder: (context) {
-                          final isDarkMode =
-                              Theme.of(context).brightness == Brightness.dark;
-
-                          return Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  product['name'] ?? 'No Name',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDarkMode
-                                        ? Colors.white
-                                        : Colors.black, // Cambia según el tema
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  'Sales Price: \$${product['list_price'] ?? 'N/A'}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  'Cost: \$${product['standard_price'] ?? 'N/A'}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  'Category: ${product['categ_name'] ?? 'N/A'}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 20),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: ElevatedButton(
-                                    style: const ButtonStyle(
-                                      foregroundColor:
-                                          WidgetStatePropertyAll(Colors.white),
-                                      backgroundColor:
-                                          WidgetStatePropertyAll(Colors.black),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('Close'),
-                                  ),
-                                ),
-                              ],
+              return ListTile(
+                title: Text(product['name'] ?? 'Unnamed'),
+                subtitle: Text('Sales Price: \$${product['list_price'] ?? 'N/A'}'),
+                trailing: const Icon(Icons.shop),
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) {
+                      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+                      return Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              product['name'] ?? 'No Name',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white : Colors.black,
+                              ),
                             ),
-                          );
-                        },
+                            const SizedBox(height: 10),
+                            Text('Sales Price: \$${product['list_price'] ?? 'N/A'}'),
+                            const SizedBox(height: 5),
+                            Text('Cost: \$${product['standard_price'] ?? 'N/A'}'),
+                            const SizedBox(height: 20),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Close'),
+                              ),
+                            ),
+                          ],
+                        ),
                       );
                     },
-                    child: ListTile(
-                      title: Text(product['name'] ?? 'No Name'),
-                      subtitle: Text(
-                        'Sales Price: \$${product['list_price'] ?? 'N/A'}',
-                      ),
-                      trailing: const Icon(Icons.shop),
-                    ),
-                  ),
-                ],
+                  );
+                },
               );
             },
           );
@@ -527,29 +482,18 @@ class _MyProductsState extends State<MyProducts> {
         curve: Curves.bounceIn,
         children: [
           SpeedDialChild(
-            child: const Icon(
-              Icons.add_shopping_cart,
-              color: Color(0xFF004C6E),
-            ),
-            backgroundColor: Colors.white,
+            child: const Icon(Icons.add_shopping_cart, color: Color(0xFF004C6E)),
             label: 'Add',
             onTap: () => _showAddProductDialog(context),
           ),
           SpeedDialChild(
-              child: const Icon(
-                Icons.remove_shopping_cart,
-                color: Color(0xFF004C6E),
-              ),
-              backgroundColor: Colors.white,
-              label: 'Delete',
-              onTap: () => _showDeleteProductDialog(context)),
+            child: const Icon(Icons.remove_shopping_cart, color: Color(0xFF004C6E)),
+            label: 'Delete',
+            onTap: () => _showDeleteProductDialog(context),
+          ),
           SpeedDialChild(
-            child: const Icon(
-              Icons.manage_history,
-              color: Color(0xFF004C6E),
-            ),
-            backgroundColor: Colors.white,
-            label: 'Update product',
+            child: const Icon(Icons.manage_history, color: Color(0xFF004C6E)),
+            label: 'Update',
             onTap: () => _showUpdateProductDialog(context),
           ),
         ],
