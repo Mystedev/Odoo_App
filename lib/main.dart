@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart'; // Asegúrate de que esta ruta sea correcta
-import 'package:odooapp/routes/employees.dart';
+import 'package:odooapp/routes/contacts.dart';
 import 'package:odooapp/routes/products.dart';
 import 'package:odooapp/themes/theme.dart';
 import 'package:odooapp/routes/comandes.dart';
@@ -30,6 +30,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Tema de la pantalla
     return MaterialApp(
       title: 'Main App',
       theme: lightTheme,

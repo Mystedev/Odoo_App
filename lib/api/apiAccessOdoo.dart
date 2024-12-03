@@ -61,7 +61,7 @@ class ApiFetch {
           "method": "search_read",
           "args": [],
           "kwargs": {
-            "fields": ["id", "name", "email", "phone"], // Campos que necesitas
+            "fields": ["id", "name", "email", "phone","vat"], // Campos que necesitas
           },
         },
       }),

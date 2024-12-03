@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api, non_constant_identifier_names, unused_element, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -18,7 +16,7 @@ class _MyEmployeesState extends State<MyEmployees> {
   @override
   void initState() {
     super.initState();
-    _contactsFuture = ApiFetch.fetchContacts(); // Obtener contactos sin autenticar
+    _contactsFuture = ApiFetch.fetchContacts(); // Obtener contactos
   }
 
   Future<void> fetchApi() async {
@@ -45,6 +43,7 @@ class _MyEmployeesState extends State<MyEmployees> {
       int? selectedContactId;
       String? initialEmail;
       String? initialPhone;
+      String? initialVat;
 
       showDialog(
         context: context,
@@ -61,13 +60,17 @@ class _MyEmployeesState extends State<MyEmployees> {
                     itemBuilder: (context, index) {
                       final contact = contacts[index];
                       return ListTile(
-                        title: Text(contact['name'] ?? 'No Name'),
+                        title: Text(
+                          contact['name'] ?? 'No Name',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         onTap: () {
                           setState(() {
                             selectedContactName = contact['name'];
                             selectedContactId = contact['id'];
                             initialEmail = contact['email'];
                             initialPhone = contact['phone'];
+                            initialVat = contact['vat'];
                           });
                         },
                         selected: selectedContactId == contact['id'],
@@ -102,6 +105,7 @@ class _MyEmployeesState extends State<MyEmployees> {
                         selectedContactName!,
                         initialEmail ?? '',
                         initialPhone ?? '',
+                        initialVat ?? '',
                       );
                     },
                     child: const Text('Next'),
@@ -123,10 +127,11 @@ class _MyEmployeesState extends State<MyEmployees> {
   }
 
   void _showEditContactDialog(BuildContext context, int contactId,
-      String initialName, String initialEmail, String initialPhone) {
+      String initialName, String initialEmail, String initialPhone, String initialVat) {
     final nameController = TextEditingController(text: initialName);
     final emailController = TextEditingController(text: initialEmail);
     final phoneController = TextEditingController(text: initialPhone);
+    final vatController = TextEditingController(text: initialVat);
 
     showDialog(
       context: context,
@@ -148,6 +153,11 @@ class _MyEmployeesState extends State<MyEmployees> {
                 TextField(
                   controller: phoneController,
                   decoration: const InputDecoration(labelText: 'Phone'),
+                ),
+                TextField(
+                  controller: vatController,
+                  enabled: false, // Solo lectura
+                  decoration: const InputDecoration(labelText: 'VAT'),
                 ),
               ],
             ),
@@ -221,23 +231,22 @@ class _MyEmployeesState extends State<MyEmployees> {
         ],
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: _contactsFuture, // Utiliza el future actual
+        future: _contactsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(), // Indicador de carga
+              child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}'), // Mostrar errores
+              child: Text('Error: ${snapshot.error}'),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
-              child: Text('No employees found'), // Sin datos
+              child: Text('No employees found'),
             );
           }
 
-          // Mostrar lista de contactos
           final contacts = snapshot.data!;
           return ListView.builder(
             padding: const EdgeInsets.all(14),
@@ -249,7 +258,6 @@ class _MyEmployeesState extends State<MyEmployees> {
                 children: [
                   InkWell(
                     onTap: () {
-                      // Mostrar BottomSheet
                       showModalBottomSheet(
                         context: context,
                         shape: const RoundedRectangleBorder(
@@ -274,7 +282,7 @@ class _MyEmployeesState extends State<MyEmployees> {
                                     fontWeight: FontWeight.bold,
                                     color: isDarkMode
                                         ? Colors.white
-                                        : Colors.black, // Cambia según el tema
+                                        : Colors.black,
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -287,16 +295,15 @@ class _MyEmployeesState extends State<MyEmployees> {
                                   'Phone: ${contact['phone'] ?? 'No Phone'}',
                                   style: const TextStyle(fontSize: 16),
                                 ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  'VAT: ${contact['vat'] ?? 'No VAT'}',
+                                  style: const TextStyle(fontSize: 16),
+                                ),
                                 const SizedBox(height: 20),
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: ElevatedButton(
-                                    style: const ButtonStyle(
-                                      foregroundColor:
-                                          WidgetStatePropertyAll(Colors.white),
-                                      backgroundColor:
-                                          WidgetStatePropertyAll(Colors.black),
-                                    ),
                                     onPressed: () {
                                       Navigator.pop(context);
                                     },
@@ -311,7 +318,13 @@ class _MyEmployeesState extends State<MyEmployees> {
                     },
                     child: ListTile(
                       title: Text(contact['name'] ?? 'No Name'),
-                      subtitle: Text(contact['email'] ?? 'No Email'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Email: ${contact['email'] ?? 'No Email'}'),
+                          Text('VAT: ${contact['vat'] ?? 'No VAT'}'),
+                        ],
+                      ),
                       trailing: const Icon(Icons.info_outline_rounded),
                     ),
                   ),
@@ -324,38 +337,24 @@ class _MyEmployeesState extends State<MyEmployees> {
       floatingActionButton: SpeedDial(
         icon: Icons.more_horiz,
         activeIcon: Icons.close,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        foregroundColor: const Color(0xFF004C6E),
-        buttonSize: const Size(20, 60),
-        visible: true,
-        curve: Curves.bounceIn,
         children: [
           SpeedDialChild(
-            child: const Icon(
-              Icons.person_add,
-              color: Color(0xFF004C6E),
-            ),
-            backgroundColor: Colors.white,
+            child: const Icon(Icons.person_add),
             label: 'Add',
-            onTap: () => DialogHelpers.showAddContactDialog(context, fetchApi),
+            onTap: () =>
+                DialogHelpers.showAddContactDialog(context, fetchApi),
           ),
           SpeedDialChild(
-              child: const Icon(
-                Icons.no_accounts_sharp,
-                color: Color(0xFF004C6E),
-              ),
-              backgroundColor: Colors.white,
-              label: 'Delete',
-              onTap: () => DialogHelpers.showDeleteContactDialog(
-                  context, ApiFetch.fetchContacts, fetchApi)),
+            child: const Icon(Icons.no_accounts_sharp),
+            label: 'Delete',
+            onTap: () => DialogHelpers.showDeleteContactDialog(
+                context, ApiFetch.fetchContacts, fetchApi),
+          ),
           SpeedDialChild(
-              child: const Icon(
-                Icons.manage_accounts,
-                color: Color(0xFF004C6E),
-              ),
-              backgroundColor: Colors.white,
-              label: 'Update contact',
-              onTap: () => _showUpdateContactDialog(context)),
+            child: const Icon(Icons.manage_accounts),
+            label: 'Update contact',
+            onTap: () => _showUpdateContactDialog(context),
+          ),
         ],
       ),
     );
