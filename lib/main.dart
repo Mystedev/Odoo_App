@@ -57,7 +57,7 @@ class AuthenticatedHomeScreen extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()), // Indicador de carga
+            body: Center(), // Indicador de carga
           );
         } else if (snapshot.hasError) {
           // En lugar de bloquear, permitir acceso mostrando un mensaje

@@ -244,8 +244,7 @@ class ApiFetch {
 }
 
 
-  static Future<void> addProduct(
-      String name, double listPrice, double standardPrice) async {
+  static Future<void> addProduct( String name, double listPrice, double standardPrice) async {
     final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
 
     // Validar si los IDs son válidos antes de enviar
@@ -484,42 +483,138 @@ class ApiFetch {
     }
   }
 
-  // Obtener datos del módulo Sales (Órdenes de venta)
-  static Future<List<dynamic>> fetchSales() async {
-    final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': 'session_id=$sessionId', // Usar sesión autenticada
+  static Future<int> addSaleOrder({
+  required int customerId,
+  required String orderDate,
+  required List<List<dynamic>> orderLines, // Acepta listas anidadas
+}) async {
+  final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cookie': 'session_id=$sessionId',
+    },
+    body: jsonEncode({
+      "jsonrpc": "2.0",
+      "method": "call",
+      "params": {
+        "model": "sale.order",
+        "method": "create",
+        "args": [
+          {
+            "partner_id": customerId,
+            "date_order": orderDate,
+            "order_line": orderLines, // Pasa el formato correcto
+          }
+        ],
+        "kwargs": {},
       },
-      body: jsonEncode({
-        "jsonrpc": "2.0",
-        "method": "call",
-        "params": {
-          "model": "sale.order", // Modelo de órdenes de venta
-          "method": "search_read",
-          "args": [],
-          "kwargs": {
-            "fields": ["id", "name", "date_order", "amount_total"], // Campos que necesitas
-          },
-        },
-      }),
-    );
+    }),
+  );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['result'] != null) {
-        print('Ventas obtenidas: ${data['result']}');
-        return List<dynamic>.from(data['result']);
-      } else {
-        throw Exception('No se pudieron obtener las ventas');
-      }
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    if (data['result'] != null) {
+      return data['result']; // Retorna el ID de la orden creada
     } else {
-      throw Exception('Error al obtener ventas: ${response.statusCode}');
+      throw Exception('Error al crear la orden: ${data['error']['data']['message']}');
     }
+  } else {
+    throw Exception('Error en la comunicación: ${response.statusCode}, ${response.body}');
   }
+}
+
+
+static List<List<dynamic>> createOrderLines(List<Map<String, dynamic>> products) {
+  return products.map((product) {
+    return [
+      0,
+      0,
+      {
+        "product_id": product['productId'], // ID del producto
+        "name": product['name'], // Descripción obligatoria
+        "product_uom_qty": product['quantity'], // Cantidad
+        "price_unit": product['unitPrice'], // Precio unitario
+      }
+    ];
+  }).toList();
+}
+
+
+
+static Future<List<dynamic>> fetchSaleOrders({int offset = 0, int limit = 10}) async {
+  final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cookie': 'session_id=$sessionId', // Usar la sesión autenticada
+    },
+    body: jsonEncode({
+      "jsonrpc": "2.0",
+      "method": "call",
+      "params": {
+        "model": "sale.order", // Modelo de órdenes de venta
+        "method": "search_read",
+        "args": [],
+        "kwargs": {
+          "fields": ["id", "name", "partner_id", "amount_total", "date_order"],
+          "offset": offset,
+          "limit": limit,
+        },
+      },
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    if (data['result'] != null) {
+      return List<dynamic>.from(data['result']);
+    } else {
+      throw Exception('No se encontraron órdenes de venta');
+    }
+  } else {
+    throw Exception('Error al obtener órdenes de venta: ${response.statusCode}');
+  }
+}
+static Future<void> deleteSaleOrders(List<int> orderIds) async {
+  final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cookie': 'session_id=$sessionId', // Usar la sesión autenticada
+    },
+    body: jsonEncode({
+      "jsonrpc": "2.0",
+      "method": "call",
+      "params": {
+        "model": "sale.order", // Modelo de órdenes de venta
+        "method": "unlink", // Método para eliminar
+        "args": [
+          orderIds, // IDs de las órdenes a eliminar
+        ],
+      },
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    if (data['result'] == true) {
+      print('Órdenes de venta eliminadas con éxito: $orderIds');
+    } else {
+      throw Exception('Error al eliminar órdenes de venta: ${response.body}');
+    }
+  } else {
+    throw Exception('Error al eliminar órdenes: ${response.statusCode}');
+  }
+}
+
 }
 
 
