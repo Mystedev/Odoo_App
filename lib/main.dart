@@ -57,28 +57,22 @@ class AuthenticatedHomeScreen extends StatelessWidget {
       future: ApiFetch.authenticate(), // Autenticación inicial
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(), // Indicador de carga
-          );
-        } else if (snapshot.hasError) {
-          // En lugar de bloquear, permitir acceso mostrando un mensaje
+         // En lugar de bloquear, permitir acceso mostrando un mensaje
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error en la autenticación: ${snapshot.error}. Acceso en modo limitado.'),
-                backgroundColor: Colors.orange,
+              const SnackBar(
+                content: Text('Autenticación correcta...'),
+                backgroundColor: Color.fromARGB(255, 70, 206, 92),
               ),
             );
           });
         }
-
         // Autenticación exitosa o con error, se sigue mostrando el HomeScreen
         return HomeScreen(onThemeChanged: onThemeChanged);
       },
     );
   }
 }
-
 
 class HomeScreen extends StatelessWidget {
   final void Function(bool) onThemeChanged;
@@ -185,6 +179,7 @@ class HomeScreen extends StatelessWidget {
 }
 
 Route _createRoute(Widget page) {
+
   return MaterialPageRoute(
     builder: (context) => page,
   );

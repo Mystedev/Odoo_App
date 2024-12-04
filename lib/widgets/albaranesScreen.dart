@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_final_fields
+// ignore_for_file: prefer_final_fields, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/routes/comandes.dart';

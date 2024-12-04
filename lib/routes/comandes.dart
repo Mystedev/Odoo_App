@@ -230,43 +230,49 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   }
 
   void _showCustomerSelectionDialog() async {
-    try {
-      final customers = await ApiFetch.fetchContacts();
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Busca un cliente'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: customers.length,
-                itemBuilder: (context, index) {
-                  final customer = customers[index];
-                  return ListTile(
-                    title: Text(customer['name']),
-                    onTap: () {
-                      setState(() {
-                        _selectedCustomerId = customer['id'];
-                        _selectedCustomerName = customer['name'];
+  try {
+    final customers = await ApiFetch.fetchContacts();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Busca un cliente'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: customers.length,
+              itemBuilder: (context, index) {
+                final customer = customers[index];
+                return ListTile(
+                  title: Text(customer['name']),
+                  onTap: () {
+                    setState(() {
+                      _selectedCustomerId = customer['id'];
+                      _selectedCustomerName = customer['name'];
+                      // Validar si 'vat' es válido antes de asignarlo
+                      if (customer['vat'] != null && customer['vat'] != false) {
                         _selectedCustomerVat = customer['vat'];
-                      });
-                      Navigator.pop(context);
-                    },
-                  );
-                },
-              ),
+                      } else {
+                        _selectedCustomerVat = ''; // o un valor por defecto si prefieres
+                      }
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              },
             ),
-          );
-        },
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-      );
-    }
+          ),
+        );
+      },
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+    );
   }
+}
+
 
   String _formatDate(String date) {
     try {
