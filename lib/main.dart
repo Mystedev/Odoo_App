@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart'; // Asegúrate de que esta ruta sea correcta
+import 'package:odooapp/routes/comandesPendents.dart';
 import 'package:odooapp/routes/contacts.dart';
 import 'package:odooapp/routes/products.dart';
 import 'package:odooapp/themes/theme.dart';
-import 'package:odooapp/routes/comandes.dart';
-import 'package:odooapp/widgets/albaranesScreen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MainApp());
 }
 
@@ -57,7 +57,7 @@ class AuthenticatedHomeScreen extends StatelessWidget {
       future: ApiFetch.authenticate(), // Autenticación inicial
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-         // En lugar de bloquear, permitir acceso mostrando un mensaje
+          // En lugar de bloquear, permitir acceso mostrando un mensaje
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -114,8 +114,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Odoo DB',
-                    style:
-                        TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
                   ),
                   Icon(Icons.dashboard, size: 50, color: Colors.white),
                 ],
@@ -140,7 +139,7 @@ class HomeScreen extends StatelessWidget {
               title: const Text('Comandes'),
               onTap: () {
                 Navigator.of(context)
-                    .push(_createRoute(const AlbaranesScreen()));
+                    .push(_createRoute(const MyWaitingSales()));
               },
             ),
           ],
@@ -159,19 +158,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 200),
-          Container(
-            child: Text(
-              'Dashboard',
-              style: TextStyle(
-                color: isDarkMode
-                    ? Colors.white
-                    : const Color.fromARGB(255, 0, 34, 58),
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          )
         ],
       ),
     );
@@ -179,8 +165,20 @@ class HomeScreen extends StatelessWidget {
 }
 
 Route _createRoute(Widget page) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin =
+          Offset(1.0, 0.0); // Comienza fuera de la pantalla a la derecha
+      const end = Offset.zero; // Termina en la posición original (pantalla)
+      const curve = Curves.easeInOut; // Transición suave
 
-  return MaterialPageRoute(
-    builder: (context) => page,
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
   );
 }

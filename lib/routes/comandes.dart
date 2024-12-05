@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously, prefer_const_declarations, unused_element
+// ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
@@ -15,7 +15,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   final List<Map<String, dynamic>> _products = [];
   int? _selectedCustomerId;
   int? _selectedProductId;
-
   String _selectedCustomerName = '';
   String _selectedCustomerVat = '';
   double _totalAmount = 0.0;
@@ -27,150 +26,178 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Crear Venta')),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildCustomerSelection(),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _dateController,
-                    readOnly: true,
-                    onTap: _selectDate,
-                    decoration: const InputDecoration(
-                      labelText: 'Fecha',
-                      border: OutlineInputBorder(),
-                      hintText: 'YYYY-MM-DD',
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Productos',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildProductForm(),
-                  const Divider(),
-                  _products.isNotEmpty
-                      ? _buildProductList()
-                      : const Text('No hay productos.'),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
+      appBar: AppBar(
+        title: const Text('Crear Venta'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionTitle('Información del Cliente'),
+              const SizedBox(height: 8),
+              _buildCustomerCard(),
+              const SizedBox(height: 16),
+              _buildSectionTitle('Detalles de la Venta'),
+              const SizedBox(height: 8),
+              _buildDateField(),
+              const SizedBox(height: 16),
+              _buildSectionTitle('Productos'),
+              const SizedBox(height: 8),
+              _buildProductForm(),
+              const SizedBox(height: 16),
+              const Divider(),
+              _products.isNotEmpty
+                  ? _buildProductList()
+                  : const Text('No hay productos añadidos.'),
+            ],
           ),
-          _buildBottomBar(),
-        ],
+        ),
+      ),
+      bottomNavigationBar: _buildBottomBar(),
+    );
+  }
+
+  // Título de cada sección
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    );
+  }
+
+  // Tarjeta de selección del cliente
+  Widget _buildCustomerCard() {
+    return Card(
+      elevation: 2,
+      child: ListTile(
+        onTap: _showCustomerSelectionDialog,
+        title: const Text('Seleccionar Cliente'),
+        subtitle: Row(
+          children: [
+            const Icon(Icons.person_2),
+            const SizedBox(width: 15),
+            Text(
+              _selectedCustomerName.isEmpty
+                  ? 'Ningún cliente seleccionado'
+                  : _selectedCustomerName,
+            ),
+            const SizedBox(width: 15),
+            // Verifica si el vat es 'false', y si lo es, no muestra nada, si no lo es, muestra el vat
+            Text(
+              (_selectedCustomerVat == 'false' || _selectedCustomerVat.isEmpty)
+                  ? ''
+                  : _selectedCustomerVat,
+            )
+          ],
+        ),
+        trailing: const Icon(Icons.arrow_drop_down),
       ),
     );
   }
 
-  Widget _buildCustomerSelection() {
-    return InkWell(
-      onTap: _showCustomerSelectionDialog,
-      child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Cliente',
-          border: OutlineInputBorder(),
-        ),
-        child: Text(
-          _selectedCustomerName.isEmpty
-              ? 'Selecciona un cliente'
-              : _selectedCustomerName,
-        ),
+  // Campo de selección de fecha con un mejor estilo
+  Widget _buildDateField() {
+    return TextField(
+      controller: _dateController,
+      readOnly: true,
+      onTap: _selectDate,
+      decoration: InputDecoration(
+        labelText: 'Fecha',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        suffixIcon: const Icon(Icons.calendar_today),
+        hintText: 'YYYY-MM-DD',
       ),
     );
   }
 
+  // Formulario de selección de producto
   Widget _buildProductForm() {
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: _fetchProducts(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(); // Indicador de carga
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError || !snapshot.hasData) {
           return const Text('Error al cargar productos');
         }
 
         final products = snapshot.data!;
-
-        return Column(
-          children: [
-            Row(
+        return Card(
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
               children: [
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    decoration: const InputDecoration(
-                      labelText: 'Producto',
-                      border: OutlineInputBorder(),
+                DropdownButtonFormField<int>(
+                  decoration: InputDecoration(
+                    labelText: 'Producto',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    items: products.map((product) {
-                      return DropdownMenuItem<int>(
-                        value: product['id'],
-                        child: Text(product['name']),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedProductId = value;
-                        final selectedProduct = products
-                            .firstWhere((product) => product['id'] == value);
-                        _productNameController.text = selectedProduct['name'];
-                        _unitPriceController.text =
-                            selectedProduct['list_price'].toString();
-                      });
-                    },
                   ),
+                  items: products.map((product) {
+                    return DropdownMenuItem<int>(
+                      value: product['id'],
+                      child: Text(product['name']),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedProductId = value;
+                      final selectedProduct = products
+                          .firstWhere((product) => product['id'] == value);
+                      _productNameController.text = selectedProduct['name'];
+                      _unitPriceController.text =
+                          selectedProduct['list_price'].toString();
+                    });
+                  },
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _unitPriceController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Precio Unitario',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: _quantityController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Cantidad',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle),
+                      color: Colors.green,
+                      onPressed: _addProduct,
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _unitPriceController,
-                    keyboardType: TextInputType.number,
-                    readOnly: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Precio Unitario',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: _quantityController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Cantidad',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: _addProduct,
-                  color: Colors.green,
-                  constraints: const BoxConstraints(
-                    maxWidth: 40,
-                    maxHeight: 40,
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         );
       },
     );
   }
 
+  // Lista de productos añadidos con estilo de tarjetas
   Widget _buildProductList() {
     return ListView.builder(
       shrinkWrap: true,
@@ -178,26 +205,30 @@ class _MySalesOdooState extends State<MySalesOdoo> {
       itemCount: _products.length,
       itemBuilder: (context, index) {
         final product = _products[index];
-        return ListTile(
-          title: Text(product['name']),
-          subtitle: Text(
-              'Cantidad: ${product['quantity']}, Precio: \$${product['unitPrice']}'),
-          trailing: Text('Total: \$${product['total']}'),
-          leading: IconButton(
-            icon: const Icon(Icons.delete,
-                color: Color.fromARGB(255, 166, 51, 43)),
-            onPressed: () => _removeProduct(product),
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          elevation: 2,
+          child: ListTile(
+            title: Text(product['name']),
+            subtitle: Text(
+                'Cantidad: ${product['quantity']} - Precio: \$${product['unitPrice']}'),
+            trailing: Text('Total: \$${product['total']}'),
+            leading: IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => _removeProduct(product),
+            ),
           ),
         );
       },
     );
   }
 
+  // Barra inferior con el botón de enviar
   Widget _buildBottomBar() {
     return Container(
       padding: const EdgeInsets.all(15),
       height: 65,
-      color: const Color.fromARGB(255, 38, 82, 104),
+      color: const Color.fromARGB(255, 49, 87, 105),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -207,12 +238,19 @@ class _MySalesOdooState extends State<MySalesOdoo> {
             icon: const Icon(Icons.send),
             label: const Text('Enviar'),
             onPressed: _submitOrder,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
+  // Métodos de lógica del formulario (sin cambios significativos)
   void _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -220,7 +258,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-
     if (pickedDate != null) {
       setState(() {
         _dateController.text =
@@ -229,64 +266,9 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     }
   }
 
-  void _showCustomerSelectionDialog() async {
-  try {
-    final customers = await ApiFetch.fetchContacts();
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Busca un cliente'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: customers.length,
-              itemBuilder: (context, index) {
-                final customer = customers[index];
-                return ListTile(
-                  title: Text(customer['name']),
-                  onTap: () {
-                    setState(() {
-                      _selectedCustomerId = customer['id'];
-                      _selectedCustomerName = customer['name'];
-                      // Validar si 'vat' es válido antes de asignarlo
-                      if (customer['vat'] != null && customer['vat'] != false) {
-                        _selectedCustomerVat = customer['vat'];
-                      } else {
-                        _selectedCustomerVat = ''; // o un valor por defecto si prefieres
-                      }
-                    });
-                    Navigator.pop(context);
-                  },
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-    );
-  }
-}
-
-
-  String _formatDate(String date) {
-    try {
-      final DateTime parsedDate = DateTime.parse(date);
-      return "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
-    } catch (e) {
-      throw Exception('Formato de fecha inválido. Usa YYYY-MM-DD');
-    }
-  }
-
   Future<List<Map<String, dynamic>>> _fetchProducts() async {
     try {
-      final products =
-          await ApiFetch.fetchProducts(); // Recuperar productos desde Odoo
+      final products = await ApiFetch.fetchProducts();
       return List<Map<String, dynamic>>.from(products);
     } catch (e) {
       print('Error al obtener productos: $e');
@@ -309,8 +291,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
       setState(() {
         _products.add({
           "productId": _selectedProductId,
-          "name":
-              _productNameController.text, // Nombre del producto seleccionado
+          "name": _productNameController.text,
           "quantity": quantity,
           "unitPrice": unitPrice,
           "total": unitPrice * quantity,
@@ -329,7 +310,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     }
   }
 
-  // Eliminar un producto si no se quiere mantener en la orden
   void _removeProduct(Map<String, dynamic> product) {
     setState(() {
       _products.remove(product);
@@ -337,61 +317,89 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     });
   }
 
-  // Funcion para comprobar que los campos no esten vacios y enviar los datos
   void _submitOrder() async {
+    // Valida el formulario antes de enviar
     if (_selectedCustomerId == null ||
         _dateController.text.isEmpty ||
         _products.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Aviso: Completa todos los campos')),
+        const SnackBar(content: Text('Completa todos los campos')),
       );
       return;
     }
 
     try {
-      // Formatea la fecha correctamente
-      final String formattedDate = _formatDate(_dateController.text);
-
-      // Genera las líneas de pedido
-      final List<List<dynamic>> orderLines =
-          ApiFetch.createOrderLines(_products);
-      print('Order Lines: $orderLines');
-
-      // Crea la orden de venta
+      final orderLines = ApiFetch.createOrderLines(_products);
       final orderId = await ApiFetch.addSaleOrder(
         customerId: _selectedCustomerId!,
-        orderDate: formattedDate, // Usa la fecha formateada
-        orderLines: orderLines, //
+        orderDate: _dateController.text,
+        vat: _selectedCustomerVat,
+        orderLines: orderLines,
       );
-      // Mensaje de orden creada exitosamente
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Orden creada con éxito. ID: $orderId',
-            style: const TextStyle(color: Colors.white),
-          ),
+          content: Text('Orden creada con éxito. ID: $orderId'),
           backgroundColor: Colors.green,
         ),
       );
-      // Vaciar los inputs de los datos
       setState(() {
-        _selectedCustomerId = null;
-        _selectedCustomerName = '';
         _products.clear();
         _totalAmount = 0.0;
         _dateController.clear();
+        _selectedCustomerName = '';
+        _selectedCustomerId = null;
       });
     } catch (e) {
-      // Error al crear la orden de venta
-      print('Error al crear la orden: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Error al crear la orden: $e',
-            style: const TextStyle(color: Colors.white),
-          ),
+          content: Text('Error al crear la orden: $e'),
           backgroundColor: Colors.red,
         ),
+      );
+    }
+  }
+
+  // Mostrar el diálogo de selección de clientes (sin cambios significativos)
+  void _showCustomerSelectionDialog() async {
+    try {
+      final customers = await ApiFetch.fetchContacts(); // Llamada a la API
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Selecciona un Cliente'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: customers.length,
+                itemBuilder: (context, index) {
+                  final customer = customers[index];
+                  return ListTile(
+                    title: Text(customer['name']),
+                    onTap: () {
+                      setState(() {
+                        print('Vat del cliente: ${customer['vat']}');
+                        _selectedCustomerId = customer['id'];
+                        _selectedCustomerName = customer['name'];
+                        _selectedCustomerVat = customer['vat'] != null &&
+                                customer['vat'] != 'false'
+                            ? customer['vat'].toString()
+                            : '';
+                      });
+                      Navigator.pop(
+                          context); // Cierra el diálogo después de la selección
+                    },
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
     }
   }
