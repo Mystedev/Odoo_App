@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
+import 'package:odooapp/utilities/salesHelpers.dart';
 
 class MySalesOdoo extends StatefulWidget {
   const MySalesOdoo({super.key});
@@ -28,6 +29,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Crear Venta'),
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -72,7 +74,14 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     return Card(
       elevation: 2,
       child: ListTile(
-        onTap: _showCustomerSelectionDialog,
+        onTap: () =>
+            SalesHelper.showCustomerSelectionDialog(context, (id, name, vat) {
+          setState(() {
+            _selectedCustomerId = id;
+            _selectedCustomerName = name;
+            _selectedCustomerVat = vat;
+          });
+        }),
         title: const Text('Seleccionar Cliente'),
         subtitle: Row(
           children: [
@@ -102,7 +111,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     return TextField(
       controller: _dateController,
       readOnly: true,
-      onTap: _selectDate,
+      onTap: () => SalesHelper.selectDate(context ,_dateController),
       decoration: InputDecoration(
         labelText: 'Fecha',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -115,7 +124,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   // Formulario de selección de producto
   Widget _buildProductForm() {
     return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _fetchProducts(),
+      future: SalesHelper.fetchProducts(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -185,7 +194,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
                     IconButton(
                       icon: const Icon(Icons.add_circle),
                       color: Colors.green,
-                      onPressed: _addProduct,
+                      onPressed:() => SalesHelper.addProduct,
                     ),
                   ],
                 ),
@@ -250,65 +259,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     );
   }
 
-  // Métodos de lógica del formulario (sin cambios significativos)
-  void _selectDate() async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (pickedDate != null) {
-      setState(() {
-        _dateController.text =
-            "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-      });
-    }
-  }
 
-  Future<List<Map<String, dynamic>>> _fetchProducts() async {
-    try {
-      final products = await ApiFetch.fetchProducts();
-      return List<Map<String, dynamic>>.from(products);
-    } catch (e) {
-      print('Error al obtener productos: $e');
-      return [];
-    }
-  }
-
-  void _addProduct() {
-    if (_selectedProductId == null || _quantityController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Completa todos los campos del producto')),
-      );
-      return;
-    }
-
-    final quantity = int.tryParse(_quantityController.text);
-    final unitPrice = double.tryParse(_unitPriceController.text);
-
-    if (quantity != null && unitPrice != null) {
-      setState(() {
-        _products.add({
-          "productId": _selectedProductId,
-          "name": _productNameController.text,
-          "quantity": quantity,
-          "unitPrice": unitPrice,
-          "total": unitPrice * quantity,
-        });
-        _totalAmount += unitPrice * quantity;
-      });
-
-      _quantityController.clear();
-      _productNameController.clear();
-      _unitPriceController.clear();
-      _selectedProductId = null;
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cantidad o precio inválido')),
-      );
-    }
-  }
 
   void _removeProduct(Map<String, dynamic> product) {
     setState(() {
@@ -318,7 +269,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   }
 
   void _submitOrder() async {
-    // Valida el formulario antes de enviar
     if (_selectedCustomerId == null ||
         _dateController.text.isEmpty ||
         _products.isEmpty) {
@@ -336,12 +286,36 @@ class _MySalesOdooState extends State<MySalesOdoo> {
         vat: _selectedCustomerVat,
         orderLines: orderLines,
       );
+
+      // Crea un mapa con todos los datos de la venta
+      final newSale = {
+        'title': 'Venta $orderId',
+        'description': 'Venta enviada con éxito el ${_dateController.text}.',
+        'customerName': _selectedCustomerName,
+        'vat': _selectedCustomerVat,
+        'date': _dateController.text,
+        'products': _products
+            .map((product) => {
+                  'name': product['name'],
+                  'quantity': product['quantity'].toString(),
+                  'unitPrice': product['unitPrice'].toString(),
+                  'total': product['total'].toString(),
+                })
+            .toList(),
+        'totalAmount': _totalAmount.toString(),
+      };
+
+      // Retorna el nuevo objeto venta
+      Navigator.pop(context, newSale);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Orden creada con éxito. ID: $orderId'),
           backgroundColor: Colors.green,
         ),
       );
+
+      // Restablecer estado
       setState(() {
         _products.clear();
         _totalAmount = 0.0;
@@ -355,51 +329,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
           content: Text('Error al crear la orden: $e'),
           backgroundColor: Colors.red,
         ),
-      );
-    }
-  }
-
-  // Mostrar el diálogo de selección de clientes (sin cambios significativos)
-  void _showCustomerSelectionDialog() async {
-    try {
-      final customers = await ApiFetch.fetchContacts(); // Llamada a la API
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Selecciona un Cliente'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: customers.length,
-                itemBuilder: (context, index) {
-                  final customer = customers[index];
-                  return ListTile(
-                    title: Text(customer['name']),
-                    onTap: () {
-                      setState(() {
-                        print('Vat del cliente: ${customer['vat']}');
-                        _selectedCustomerId = customer['id'];
-                        _selectedCustomerName = customer['name'];
-                        _selectedCustomerVat = customer['vat'] != null &&
-                                customer['vat'] != 'false'
-                            ? customer['vat'].toString()
-                            : '';
-                      });
-                      Navigator.pop(
-                          context); // Cierra el diálogo después de la selección
-                    },
-                  );
-                },
-              ),
-            ),
-          );
-        },
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
     }
   }

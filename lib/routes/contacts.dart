@@ -221,6 +221,7 @@ class _MyEmployeesState extends State<MyEmployees> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Contacts List'),
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.replay_outlined,
