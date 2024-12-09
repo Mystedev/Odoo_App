@@ -19,6 +19,7 @@ final ThemeData lightTheme = ThemeData(
     backgroundColor: Color(0xFF004C6E), // Azul oscuro
     titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
   ),
+  primaryColor: Color(0xFF004C6E),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       foregroundColor: Colors.white, // Color del texto del botón

@@ -50,7 +50,7 @@ class _MainAppState extends State<MainApp> {
 class AuthenticatedHomeScreen extends StatelessWidget {
   final void Function(bool) onThemeChanged;
 
-  const AuthenticatedHomeScreen({super.key, required this.onThemeChanged});
+  const AuthenticatedHomeScreen({super.key, required this.onThemeChanged});// AUTENTICA LOS DATOS DE ODOO
 
   @override
   Widget build(BuildContext context) {
@@ -63,12 +63,12 @@ class AuthenticatedHomeScreen extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Autenticación correcta...'),
-                backgroundColor: Color.fromARGB(255, 70, 206, 92),
+                backgroundColor: Color.fromARGB(255, 206, 127, 70),
               ),
             );
           });
         }
-        // Autenticación exitosa o con error, se sigue mostrando el HomeScreen
+        // Autenticación exitosa o con error, se sigue mostrando la pantalla actual
         return HomeScreen(onThemeChanged: onThemeChanged);
       },
     );
@@ -100,7 +100,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      drawer: Drawer(
+      drawer: Drawer( // Barra de navegacion lateral izquierdo
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -121,6 +121,7 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
+            // Elementos de la barra de navegación
             ListTile(
               leading: const Icon(Icons.shop),
               title: const Text('Products'),
@@ -148,7 +149,7 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Image.asset("lib/assets/rb_2149227348.png"),
+          Image.asset("lib/assets/rb_2149227348.png"),// Imagen referente en el inicio de la aplicacion
           Center(
             child: Text(
               'Odoo DB',

@@ -1,34 +1,57 @@
-// ignore_for_file: use_build_context_synchronously, avoid_print
+// ignore_for_file: unused_element
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
 import 'package:odooapp/utilities/salesHelpers.dart';
 
 class MySalesOdoo extends StatefulWidget {
-  const MySalesOdoo({super.key});
+  final Map<String, dynamic> initialSale;
+
+  const MySalesOdoo({super.key, required this.initialSale});
 
   @override
   State<MySalesOdoo> createState() => _MySalesOdooState();
 }
 
 class _MySalesOdooState extends State<MySalesOdoo> {
-  final TextEditingController _dateController = TextEditingController();
-  final List<Map<String, dynamic>> _products = [];
+  List<Map<String, dynamic>> _products = [];
   int? _selectedCustomerId;
   int? _selectedProductId;
   String _selectedCustomerName = '';
   String _selectedCustomerVat = '';
   double _totalAmount = 0.0;
 
+  final TextEditingController _dateController = TextEditingController();
   final TextEditingController _productNameController = TextEditingController();
   final TextEditingController _unitPriceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
+
+  bool _isDraft = false; // Variable para controlar el estado de borrador
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
+
+  void _loadInitialData() {
+    // Cargar datos de la venta inicial desde el borrador
+    if (widget.initialSale.isNotEmpty) {
+      _selectedCustomerName = widget.initialSale['customerName'] ?? '';
+      _selectedCustomerVat = widget.initialSale['vat'] ?? '';
+      _dateController.text = widget.initialSale['date'] ?? '';
+      _products =
+          List<Map<String, dynamic>>.from(widget.initialSale['products'] ?? []);
+      _totalAmount =
+          double.tryParse(widget.initialSale['totalAmount'] ?? '0.0') ?? 0.0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Crear Venta'),
+        title: const Text('Nueva Venta'),
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -93,7 +116,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
                   : _selectedCustomerName,
             ),
             const SizedBox(width: 15),
-            // Verifica si el vat es 'false', y si lo es, no muestra nada, si no lo es, muestra el vat
             Text(
               (_selectedCustomerVat == 'false' || _selectedCustomerVat.isEmpty)
                   ? ''
@@ -111,7 +133,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     return TextField(
       controller: _dateController,
       readOnly: true,
-      onTap: () => SalesHelper.selectDate(context ,_dateController),
+      onTap: () => SalesHelper.selectDate(context, _dateController),
       decoration: InputDecoration(
         labelText: 'Fecha',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -155,11 +177,9 @@ class _MySalesOdooState extends State<MySalesOdoo> {
                   onChanged: (value) {
                     setState(() {
                       _selectedProductId = value;
-                      final selectedProduct = products
-                          .firstWhere((product) => product['id'] == value);
+                      final selectedProduct = products.firstWhere((product) => product['id'] == value);
                       _productNameController.text = selectedProduct['name'];
-                      _unitPriceController.text =
-                          selectedProduct['list_price'].toString();
+                      _unitPriceController.text = selectedProduct['list_price'].toString();
                     });
                   },
                 ),
@@ -194,7 +214,23 @@ class _MySalesOdooState extends State<MySalesOdoo> {
                     IconButton(
                       icon: const Icon(Icons.add_circle),
                       color: Colors.green,
-                      onPressed:() => SalesHelper.addProduct,
+                      onPressed: () {
+                        SalesHelper.addProduct(
+                          context,
+                          _products,
+                          _productNameController,
+                          _unitPriceController,
+                          _quantityController,
+                          _selectedProductId,
+                          _totalAmount,
+                          (updatedProducts, updatedTotal) {
+                            setState(() {
+                              _products = updatedProducts;
+                              _totalAmount = updatedTotal;
+                            });
+                          },
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -206,7 +242,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     );
   }
 
-  // Lista de productos añadidos con estilo de tarjetas
+  // Lista de productos añadidos
   Widget _buildProductList() {
     return ListView.builder(
       shrinkWrap: true,
@@ -232,7 +268,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     );
   }
 
-  // Barra inferior con el botón de enviar
+  // Barra inferior con el botón de guardar y enviar
   Widget _buildBottomBar() {
     return Container(
       padding: const EdgeInsets.all(15),
@@ -241,16 +277,56 @@ class _MySalesOdooState extends State<MySalesOdoo> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          TextButton(
+            style: TextButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 244, 245, 247)),
+            onPressed: () {
+              final draftSale = {
+                'title': 'Borrador - ${_dateController.text}',
+                'description': 'Venta en progreso guardada.',
+                'customerName': _selectedCustomerName,
+                'vat': _selectedCustomerVat,
+                'date': _dateController.text,
+                'products': _products
+                    .map((product) => {
+                          'name': product['name'],
+                          'quantity': product['quantity'].toString(),
+                          'unitPrice': product['unitPrice'].toString(),
+                          'total': product['total'].toString(),
+                        })
+                    .toList(),
+                'totalAmount': _totalAmount.toString(),
+              };
+
+              // Actualizamos el estado para indicar que estamos en borrador
+              setState(() {
+                _isDraft = true;
+              });
+
+              Navigator.pop(context, draftSale);
+            },
+            child: const Text(
+              'Borrador',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
           Text('Total: \$$_totalAmount',
               style: const TextStyle(fontSize: 18, color: Colors.white)),
           ElevatedButton.icon(
-            icon: const Icon(Icons.send),
-            label: const Text('Enviar'),
+            icon: const Icon(
+              Icons.send,
+              color: Colors.blue,
+            ),
+            label: const Text(
+              'Enviar',
+              style: TextStyle(color: Colors.blue),
+            ),
             onPressed: _submitOrder,
             style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(25),
               ),
             ),
           ),
@@ -259,8 +335,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     );
   }
 
-
-
+  // Eliminar un producto de la lista
   void _removeProduct(Map<String, dynamic> product) {
     setState(() {
       _products.remove(product);
@@ -268,6 +343,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     });
   }
 
+  // Función para enviar la orden
   void _submitOrder() async {
     if (_selectedCustomerId == null ||
         _dateController.text.isEmpty ||
@@ -287,7 +363,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
         orderLines: orderLines,
       );
 
-      // Crea un mapa con todos los datos de la venta
       final newSale = {
         'title': 'Venta $orderId',
         'description': 'Venta enviada con éxito el ${_dateController.text}.',
@@ -303,9 +378,9 @@ class _MySalesOdooState extends State<MySalesOdoo> {
                 })
             .toList(),
         'totalAmount': _totalAmount.toString(),
+        'status': 'pending', // Estado de venta pendiente
       };
 
-      // Retorna el nuevo objeto venta
       Navigator.pop(context, newSale);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -315,7 +390,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
         ),
       );
 
-      // Restablecer estado
       setState(() {
         _products.clear();
         _totalAmount = 0.0;
