@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:odooapp/routes/borradorScreen.dart';
 import 'package:odooapp/routes/comandes.dart';
-import 'package:odooapp/widgets/widgetsVentas/salesCardPendents.dart';
 import 'package:odooapp/widgets/widgetsVentas/salesSectionPendents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -215,7 +214,6 @@ class _MyWaitingSalesState extends State<MyWaitingSales> {
           children: [
             Text('Nueva venta'),
             SizedBox(width: 10),
-            Icon(Icons.add),
           ],
         ),
       ),

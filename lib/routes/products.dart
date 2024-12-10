@@ -5,7 +5,8 @@ import 'package:odooapp/api/apiAccessOdoo.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class MyProducts extends StatefulWidget {
-  const MyProducts({super.key});
+  final Future<List<dynamic>> productsFuture; // Declarar propiedad para el Future
+  const MyProducts({super.key, required this.productsFuture}); // Inicializar el future
 
   @override
   _MyProductsState createState() => _MyProductsState();
@@ -17,7 +18,7 @@ class _MyProductsState extends State<MyProducts> {
   @override
   void initState() {
     super.initState();
-    _productsFuture = ApiFetch.fetchProducts(); // Cargar productos sin autenticar
+    _productsFuture = widget.productsFuture; // Cargar productos sin autenticar
   }
 
   Future<void> fetchApi() async {
@@ -475,24 +476,22 @@ class _MyProductsState extends State<MyProducts> {
       floatingActionButton: SpeedDial(
         icon: Icons.more_horiz,
         activeIcon: Icons.close,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF004C6E),
         buttonSize: const Size(20, 60),
         visible: true,
         curve: Curves.bounceIn,
         children: [
           SpeedDialChild(
-            child: const Icon(Icons.add_shopping_cart, color: Color(0xFF004C6E)),
+            child: const Icon(Icons.add_shopping_cart),
             label: 'Add',
             onTap: () => _showAddProductDialog(context),
           ),
           SpeedDialChild(
-            child: const Icon(Icons.remove_shopping_cart, color: Color(0xFF004C6E)),
+            child: const Icon(Icons.remove_shopping_cart),
             label: 'Delete',
             onTap: () => _showDeleteProductDialog(context),
           ),
           SpeedDialChild(
-            child: const Icon(Icons.manage_history, color: Color(0xFF004C6E)),
+            child: const Icon(Icons.manage_history),
             label: 'Update',
             onTap: () => _showUpdateProductDialog(context),
           ),

@@ -1,12 +1,14 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart'; // Asegúrate de que esta ruta sea correcta
-import 'package:odooapp/routes/comandes.dart';
 import 'package:odooapp/routes/comandesPendents.dart';
 import 'package:odooapp/routes/contacts.dart';
 import 'package:odooapp/routes/products.dart';
 import 'package:odooapp/themes/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Importamos shared_preferences
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +23,53 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
+  late Future<List<dynamic>> _productsFuture = ApiFetch.fetchProducts();
+  late Future<List<dynamic>> _contactsFuture = ApiFetch.fetchContacts();
   ThemeMode _themeMode = ThemeMode.light;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ejecuta la autenticación y luego recupera los datos.
+    _authenticateAndFetchData();
+  }
+
+  Future<void> _authenticateAndFetchData() async {
+    // Asegúrate de que la autenticación sea exitosa antes de obtener los productos y contactos
+    await ApiFetch.authenticate();
+    _productsFuture = _getCachedProducts();
+    _contactsFuture = _getCachedContacts();
+  }
+
+  Future<List<dynamic>> _getCachedProducts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cachedProducts = prefs.getString('cachedProducts');
+
+    if (cachedProducts != null) {
+      // Si hay productos en caché, los retornamos
+      return jsonDecode(cachedProducts);
+    } else {
+      // Si no, llamamos a la API y almacenamos en caché
+      final products = await ApiFetch.fetchProducts();
+      prefs.setString('cachedProducts', jsonEncode(products));
+      return products;
+    }
+  }
+
+  Future<List<dynamic>> _getCachedContacts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cachedContacts = prefs.getString('cachedContacts');
+
+    if (cachedContacts != null) {
+      // Si hay contactos en caché, los retornamos
+      return jsonDecode(cachedContacts);
+    } else {
+      // Si no, llamamos a la API y almacenamos en caché
+      final contacts = await ApiFetch.fetchContacts();
+      prefs.setString('cachedContacts', jsonEncode(contacts));
+      return contacts;
+    }
+  }
 
   void _toggleTheme(bool isDarkMode) {
     setState(() {
@@ -31,7 +79,6 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Tema de la pantalla
     return MaterialApp(
       title: 'Main App',
       theme: lightTheme,
@@ -41,7 +88,24 @@ class _MainAppState extends State<MainApp> {
         data: _themeMode == ThemeMode.dark ? darkTheme : lightTheme,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
-        child: AuthenticatedHomeScreen(onThemeChanged: _toggleTheme),
+        child: FutureBuilder<void>(
+          future: ApiFetch.authenticate(),
+          builder: (context, snapshot) {
+            return AnimatedOpacity(
+              opacity:
+                  snapshot.connectionState == ConnectionState.done ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: snapshot.hasError
+                  ? Center(
+                      child: Text('Error de autenticación: ${snapshot.error}'))
+                  : AuthenticatedHomeScreen(
+                      onThemeChanged: _toggleTheme,
+                      contactsFuture: _contactsFuture,
+                      productsFuture: _productsFuture,
+                    ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -49,36 +113,37 @@ class _MainAppState extends State<MainApp> {
 
 class AuthenticatedHomeScreen extends StatelessWidget {
   final void Function(bool) onThemeChanged;
+  final Future<List<dynamic>> contactsFuture;
+  final Future<List<dynamic>> productsFuture;
 
-  const AuthenticatedHomeScreen({super.key, required this.onThemeChanged});// AUTENTICA LOS DATOS DE ODOO
+  AuthenticatedHomeScreen({
+    super.key,
+    required this.onThemeChanged,
+    required this.contactsFuture,
+    required this.productsFuture,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: ApiFetch.authenticate(), // Autenticación inicial
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // En lugar de bloquear, permitir acceso mostrando un mensaje
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Autenticación correcta...'),
-                backgroundColor: Color.fromARGB(255, 206, 127, 70),
-              ),
-            );
-          });
-        }
-        // Autenticación exitosa o con error, se sigue mostrando la pantalla actual
-        return HomeScreen(onThemeChanged: onThemeChanged);
-      },
+    return HomeScreen(
+      onThemeChanged: onThemeChanged,
+      contactsFuture: contactsFuture,
+      productsFuture: productsFuture,
     );
   }
 }
 
 class HomeScreen extends StatelessWidget {
   final void Function(bool) onThemeChanged;
+  final Future<List<dynamic>> contactsFuture;
+  final Future<List<dynamic>> productsFuture;
 
-  const HomeScreen({super.key, required this.onThemeChanged});
+  const HomeScreen({
+    super.key,
+    required this.onThemeChanged,
+    required this.contactsFuture,
+    required this.productsFuture,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +165,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      drawer: Drawer( // Barra de navegacion lateral izquierdo
+      drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -121,19 +186,23 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-            // Elementos de la barra de navegación
             ListTile(
               leading: const Icon(Icons.shop),
               title: const Text('Products'),
               onTap: () {
-                Navigator.of(context).push(_createRoute(const MyProducts()));
+                Navigator.of(context).push(
+                    _createRoute(MyProducts(productsFuture: productsFuture)));
               },
             ),
             ListTile(
               leading: const Icon(Icons.person),
               title: const Text('Contacts'),
               onTap: () {
-                Navigator.of(context).push(_createRoute(const MyEmployees()));
+                Navigator.of(context).push(
+                  _createRoute(
+                    MyEmployees(contactsFuture: contactsFuture),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -149,7 +218,7 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Image.asset("lib/assets/rb_2149227348.png"),// Imagen referente en el inicio de la aplicacion
+          Image.asset("lib/assets/rb_2149227348.png"),
           Center(
             child: Text(
               'Odoo DB',
@@ -170,10 +239,9 @@ Route _createRoute(Widget page) {
   return PageRouteBuilder(
     pageBuilder: (context, animation, secondaryAnimation) => page,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin =
-          Offset(1.0, 0.0); // Comienza fuera de la pantalla a la derecha
-      const end = Offset.zero; // Termina en la posición original (pantalla)
-      const curve = Curves.easeInOut; // Transición suave
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.easeInOut;
 
       var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 

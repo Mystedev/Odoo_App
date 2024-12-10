@@ -26,8 +26,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   final TextEditingController _unitPriceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
 
-  bool _isDraft = false; // Variable para controlar el estado de borrador
-
   @override
   void initState() {
     super.initState();
@@ -300,7 +298,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
 
               // Actualizamos el estado para indicar que estamos en borrador
               setState(() {
-                _isDraft = true;
               });
 
               Navigator.pop(context, draftSale);

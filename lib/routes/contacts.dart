@@ -1,10 +1,14 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:odooapp/utilities/dialog_helpers.dart';
 
 class MyEmployees extends StatefulWidget {
-  const MyEmployees({super.key});
+  final Future<List<dynamic>> contactsFuture; // Declarar propiedad
+
+  const MyEmployees({super.key, required this.contactsFuture}); // Inicializar propiedad
 
   @override
   _MyEmployeesState createState() => _MyEmployeesState();
@@ -16,18 +20,18 @@ class _MyEmployeesState extends State<MyEmployees> {
   @override
   void initState() {
     super.initState();
-    _contactsFuture = ApiFetch.fetchContacts(); // Obtener contactos
+    _contactsFuture = widget.contactsFuture; // Asignar el valor recibido al Future local
   }
 
   Future<void> fetchApi() async {
     setState(() {
-      _contactsFuture = ApiFetch.fetchContacts(); // Recargar contactos
+      _contactsFuture = widget.contactsFuture; // Recargar contactos directamente desde la API
     });
   }
 
   void _showUpdateContactDialog(BuildContext context) async {
     try {
-      final contacts = await ApiFetch.fetchContacts(); // Obtener contactos
+      final contacts = await _contactsFuture; // Obtener contactos desde _contactsFuture
 
       if (contacts.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(

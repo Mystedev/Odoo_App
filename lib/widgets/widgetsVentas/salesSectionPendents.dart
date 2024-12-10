@@ -48,7 +48,7 @@ class SalesSection extends StatelessWidget {
                 ? () => onSaleLongPress!(sale)
                 : null, // Maneja mantener presionado
               child: Card(
-                color: const Color.fromARGB(255, 18, 85, 110),
+                color: const Color.fromARGB(255, 119, 179, 201),
                 elevation: 3,
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
@@ -89,7 +89,7 @@ class SalesSection extends StatelessWidget {
                 ),
               ),
             );
-          }).toList(),
+          })
       ],
     );
   }
