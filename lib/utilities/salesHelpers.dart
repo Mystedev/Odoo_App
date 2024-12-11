@@ -71,7 +71,7 @@ class SalesHelper {
 
   static Future<void> showCustomerSelectionDialog(
     BuildContext context,
-    Function(int, String, String) onCustomerSelected,
+    Function(int, String, String) onCustomerSelected, List<Map<String, dynamic>> contacts,
   ) async {
     try {
       final customers = await ApiFetch.fetchContacts();

@@ -1,6 +1,7 @@
 // ignore_for_file: unused_element
-
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert'; // Para manejar JSON de SharedPreferences
 import 'package:odooapp/api/apiAccessOdoo.dart';
 import 'package:odooapp/utilities/salesHelpers.dart';
 
@@ -32,8 +33,8 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     _loadInitialData();
   }
 
+  // Cargar datos iniciales de la venta o borrador
   void _loadInitialData() {
-    // Cargar datos de la venta inicial desde el borrador
     if (widget.initialSale.isNotEmpty) {
       _selectedCustomerName = widget.initialSale['customerName'] ?? '';
       _selectedCustomerVat = widget.initialSale['vat'] ?? '';
@@ -43,6 +44,26 @@ class _MySalesOdooState extends State<MySalesOdoo> {
       _totalAmount =
           double.tryParse(widget.initialSale['totalAmount'] ?? '0.0') ?? 0.0;
     }
+  }
+
+  // Cargar contactos guardados en SharedPreferences
+  Future<List<Map<String, dynamic>>> _loadContactsFromCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('contacts');
+    if (jsonString != null) {
+      return List<Map<String, dynamic>>.from(jsonDecode(jsonString));
+    }
+    return [];
+  }
+
+  // Cargar productos guardados en SharedPreferences
+  Future<List<Map<String, dynamic>>> _loadProductsFromCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('products');
+    if (jsonString != null) {
+      return List<Map<String, dynamic>>.from(jsonDecode(jsonString));
+    }
+    return [];
   }
 
   @override
@@ -82,7 +103,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     );
   }
 
-  // Título de cada sección
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
@@ -90,43 +110,56 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     );
   }
 
-  // Tarjeta de selección del cliente
   Widget _buildCustomerCard() {
-    return Card(
-      elevation: 2,
-      child: ListTile(
-        onTap: () =>
-            SalesHelper.showCustomerSelectionDialog(context, (id, name, vat) {
-          setState(() {
-            _selectedCustomerId = id;
-            _selectedCustomerName = name;
-            _selectedCustomerVat = vat;
-          });
-        }),
-        title: const Text('Seleccionar Cliente'),
-        subtitle: Row(
-          children: [
-            const Icon(Icons.person_2),
-            const SizedBox(width: 15),
-            Text(
-              _selectedCustomerName.isEmpty
-                  ? 'Ningún cliente seleccionado'
-                  : _selectedCustomerName,
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _loadContactsFromCache(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Text('No se pudieron cargar los contactos.');
+        }
+
+        final contacts = snapshot.data!;
+        return Card(
+          elevation: 2,
+          child: ListTile(
+            onTap: () => SalesHelper.showCustomerSelectionDialog(
+              context,
+              (id, name, vat) {
+                setState(() {
+                  _selectedCustomerId = id;
+                  _selectedCustomerName = name;
+                  _selectedCustomerVat = vat;
+                });
+              },
+              contacts, // Pasamos los contactos cargados
             ),
-            const SizedBox(width: 15),
-            Text(
-              (_selectedCustomerVat == 'false' || _selectedCustomerVat.isEmpty)
-                  ? ''
-                  : _selectedCustomerVat,
-            )
-          ],
-        ),
-        trailing: const Icon(Icons.arrow_drop_down),
-      ),
+            title: const Text('Seleccionar Cliente'),
+            subtitle: Row(
+              children: [
+                const Icon(Icons.person_2),
+                const SizedBox(width: 15),
+                Text(
+                  _selectedCustomerName.isEmpty
+                      ? 'Ningún cliente seleccionado'
+                      : _selectedCustomerName,
+                ),
+                const SizedBox(width: 15),
+                Text(
+                  (_selectedCustomerVat == 'false' || _selectedCustomerVat.isEmpty)
+                      ? ''
+                      : _selectedCustomerVat,
+                )
+              ],
+            ),
+            trailing: const Icon(Icons.arrow_drop_down),
+          ),
+        );
+      },
     );
   }
 
-  // Campo de selección de fecha con un mejor estilo
   Widget _buildDateField() {
     return TextField(
       controller: _dateController,
@@ -141,15 +174,14 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     );
   }
 
-  // Formulario de selección de producto
   Widget _buildProductForm() {
     return FutureBuilder<List<Map<String, dynamic>>>(
-      future: SalesHelper.fetchProducts(),
+      future: _loadProductsFromCache(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError || !snapshot.hasData) {
-          return const Text('Error al cargar productos');
+        } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Text('No se pudieron cargar los productos.');
         }
 
         final products = snapshot.data!;
@@ -175,9 +207,11 @@ class _MySalesOdooState extends State<MySalesOdoo> {
                   onChanged: (value) {
                     setState(() {
                       _selectedProductId = value;
-                      final selectedProduct = products.firstWhere((product) => product['id'] == value);
+                      final selectedProduct = products
+                          .firstWhere((product) => product['id'] == value);
                       _productNameController.text = selectedProduct['name'];
-                      _unitPriceController.text = selectedProduct['list_price'].toString();
+                      _unitPriceController.text =
+                          selectedProduct['list_price'].toString();
                     });
                   },
                 ),
@@ -240,7 +274,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     );
   }
 
-  // Lista de productos añadidos
   Widget _buildProductList() {
     return ListView.builder(
       shrinkWrap: true,
@@ -266,7 +299,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     );
   }
 
-  // Barra inferior con el botón de guardar y enviar
   Widget _buildBottomBar() {
     return Container(
       padding: const EdgeInsets.all(15),
@@ -276,12 +308,9 @@ class _MySalesOdooState extends State<MySalesOdoo> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           TextButton(
-            style: TextButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 244, 245, 247)),
             onPressed: () {
               final draftSale = {
                 'title': 'Borrador - ${_dateController.text}',
-                'description': 'Venta en progreso guardada.',
                 'customerName': _selectedCustomerName,
                 'vat': _selectedCustomerVat,
                 'date': _dateController.text,
@@ -296,16 +325,9 @@ class _MySalesOdooState extends State<MySalesOdoo> {
                 'totalAmount': _totalAmount.toString(),
               };
 
-              // Actualizamos el estado para indicar que estamos en borrador
-              setState(() {
-              });
-
-              Navigator.pop(context, draftSale);
+              Navigator.pop(context, draftSale); // Devuelve el borrador actualizado
             },
-            child: const Text(
-              'Borrador',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Guardar Borrador'),
           ),
           Text('Total: \$$_totalAmount',
               style: const TextStyle(fontSize: 18, color: Colors.white)),
@@ -332,7 +354,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     );
   }
 
-  // Eliminar un producto de la lista
   void _removeProduct(Map<String, dynamic> product) {
     setState(() {
       _products.remove(product);
@@ -340,7 +361,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     });
   }
 
-  // Función para enviar la orden
   void _submitOrder() async {
     if (_selectedCustomerId == null ||
         _dateController.text.isEmpty ||

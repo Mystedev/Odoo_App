@@ -1,24 +1,43 @@
-// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api, avoid_print
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api, avoid_print, unused_element
+
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyProducts extends StatefulWidget {
-  final Future<List<dynamic>> productsFuture; // Declarar propiedad para el Future
-  const MyProducts({super.key, required this.productsFuture}); // Inicializar el future
+  final Future<List<dynamic>>productsFuture; 
+  const MyProducts(
+      {super.key, required this.productsFuture}); // Inicializar el future
 
   @override
   _MyProductsState createState() => _MyProductsState();
 }
 
 class _MyProductsState extends State<MyProducts> {
-  late Future<List<dynamic>> _productsFuture;
-  
+  late Future<List<dynamic>> _productsFuture = Future.value([]);
+
   @override
   void initState() {
     super.initState();
-    _productsFuture = widget.productsFuture; // Cargar productos sin autenticar
+    _loadProductsFromPreferences();
+  }
+
+  Future<void> _loadProductsFromPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('products');
+
+    if (jsonString != null) {
+      final List<dynamic> products = jsonDecode(jsonString);
+      setState(() {
+        _productsFuture = Future.value(products); // Usar lista de products guardados en SharedPreferences
+      });
+    } else {
+      // Si no hay productys guardados, utilizar la fuente proporcionada
+      _productsFuture = widget.productsFuture;
+    }
   }
 
   Future<void> fetchApi() async {
@@ -309,7 +328,8 @@ class _MyProductsState extends State<MyProducts> {
   void _showEditProductDialog(BuildContext context, int productId,
       String initialName, double initialListPrice, double initialCost) {
     final nameController = TextEditingController(text: initialName);
-    final listPriceController = TextEditingController(text: initialListPrice.toString());
+    final listPriceController =
+        TextEditingController(text: initialListPrice.toString());
     final costController = TextEditingController(text: initialCost.toString());
 
     showDialog(
@@ -348,13 +368,15 @@ class _MyProductsState extends State<MyProducts> {
             ElevatedButton(
               onPressed: () async {
                 final name = nameController.text.trim();
-                final listPrice = double.tryParse(listPriceController.text.trim());
+                final listPrice =
+                    double.tryParse(listPriceController.text.trim());
                 final cost = double.tryParse(costController.text.trim());
 
                 if (name.isEmpty || listPrice == null || cost == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('All fields are required and must be valid!'),
+                      content:
+                          Text('All fields are required and must be valid!'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -399,7 +421,8 @@ class _MyProductsState extends State<MyProducts> {
         title: const Text('My Products'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.replay_outlined, color: Colors.white, size: 30),
+            icon: const Icon(Icons.replay_outlined,
+                color: Colors.white, size: 30),
             onPressed: () => fetchApi(), // Recargar productos
           ),
           const SizedBox(width: 20),
@@ -426,16 +449,19 @@ class _MyProductsState extends State<MyProducts> {
               final product = products[index];
               return ListTile(
                 title: Text(product['name'] ?? 'Unnamed'),
-                subtitle: Text('Sales Price: \$${product['list_price'] ?? 'N/A'}'),
+                subtitle:
+                    Text('Sales Price: \$${product['list_price'] ?? 'N/A'}'),
                 trailing: const Icon(Icons.shop),
                 onTap: () {
                   showModalBottomSheet(
                     context: context,
                     shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
                     ),
                     builder: (context) {
-                      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+                      final isDarkMode =
+                          Theme.of(context).brightness == Brightness.dark;
                       return Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -451,9 +477,11 @@ class _MyProductsState extends State<MyProducts> {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            Text('Sales Price: \$${product['list_price'] ?? 'N/A'}'),
+                            Text(
+                                'Sales Price: \$${product['list_price'] ?? 'N/A'}'),
                             const SizedBox(height: 5),
-                            Text('Cost: \$${product['standard_price'] ?? 'N/A'}'),
+                            Text(
+                                'Cost: \$${product['standard_price'] ?? 'N/A'}'),
                             const SizedBox(height: 20),
                             Align(
                               alignment: Alignment.centerRight,

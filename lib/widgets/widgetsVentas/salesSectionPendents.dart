@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
-// Pantalla para mostrar las ventas en tarjetas
 class SalesSection extends StatelessWidget {
   final String title;
   final TextStyle titleStyle;
   final List<Map<String, dynamic>> sales;
   final Function(Map<String, dynamic>) onSaleTap;
-  final Function(Map<String, dynamic>)? onSaleLongPress; // Parámetro opcional
+  final Function(Map<String, dynamic>)? onSaleLongPress;
 
   const SalesSection({
     super.key,
@@ -14,13 +13,13 @@ class SalesSection extends StatelessWidget {
     required this.titleStyle,
     required this.sales,
     required this.onSaleTap,
-    this.onSaleLongPress, // Acepta una función opcional
+    this.onSaleLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,// Alinea los elementos desde la izquierda
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -41,61 +40,97 @@ class SalesSection extends StatelessWidget {
             ),
           )
         else
-          ...sales.map((sale) { // Itera sobre la lista de ventas para encontrar el elemento requerido
+          ...sales.map((sale) {
             return GestureDetector(
-              onTap: () => onSaleTap(sale), // Accede a la pantalla de detalles y muestra los datos de la venta seleccionada
+              onTap: () => onSaleTap(sale),
               onLongPress: onSaleLongPress != null
-                ? () => onSaleLongPress!(sale)
-                : null, // Maneja mantener presionado
+                  ? () => onSaleLongPress!(sale)
+                  : null,
               child: Card(
-                color: const Color.fromARGB(255, 119, 179, 201),
-                elevation: 3,
+                elevation: 4,
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column( // Tarjeta con la informacion de la venta en la pantalla de ventas
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      // Icono principal (puede ser una imagen en lugar de un icono)
+                      Container(
+                        height: 60,
+                        width: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.store,
+                          size: 30,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Información principal
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              sale['customerName'] ?? 'Cliente no especificado',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Fecha: ${sale['date'] ?? 'No especificada'}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ..._buildProductSummary(sale['products']),
+                          ],
+                        ),
+                      ),
+                      // Total
+                      Column(
                         children: [
-                          const Icon(Icons.person, color: Colors.blue),
-                          const SizedBox(width: 10),
                           Text(
-                            sale['customerName'] ?? 'Cliente no especificado',
+                            '\$${sale['totalAmount'] ?? '0.0'}',
                             style: const TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            sale['products'].length > 1
+                                ? '${sale['products'].length} productos'
+                                : '${sale['products'].length} producto',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Productos (${sale['products'].length}):',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      // Muestra los primeros 2 productos
-                      ..._buildProductSummary(sale['products']),
-                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
               ),
             );
-          })
+          }),
       ],
     );
   }
 
-  List<Widget> _buildProductSummary(List<dynamic> products) { // Crea un resumen con los datos obtenidos para referir a la venta añadida a la lista
-    // Mostrar solo los primeros 2 productos y indicar si hay más
+  List<Widget> _buildProductSummary(List<dynamic> products) {
     const maxProducts = 2;
     final List<Widget> productWidgets = [];
     for (var i = 0; i < products.length && i < maxProducts; i++) {
@@ -105,7 +140,11 @@ class SalesSection extends StatelessWidget {
           padding: const EdgeInsets.only(left: 8.0, top: 4),
           child: Row(
             children: [
-              const Icon(Icons.shopping_cart, color: Color.fromARGB(255, 67, 230, 154), size: 18),
+              const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 16,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -118,7 +157,7 @@ class SalesSection extends StatelessWidget {
         ),
       );
     }
-    if (products.length > maxProducts) { // Se muestran inicialmente 2 ventas y si hay mas , se añade la opcion de ver el resto al pulsar encima
+    if (products.length > maxProducts) {
       productWidgets.add(
         const Padding(
           padding: EdgeInsets.only(left: 8.0, top: 4),

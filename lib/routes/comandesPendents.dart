@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:odooapp/routes/borradorScreen.dart';
 import 'package:odooapp/routes/comandes.dart';
 import 'package:odooapp/widgets/widgetsVentas/salesSectionPendents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -147,23 +146,22 @@ class _MyWaitingSalesState extends State<MyWaitingSales> {
             titleStyle: sectionTitleStyle,
             sales: sectionSales,
             onSaleTap: (sale) async {
-              // Editar venta al tocar
               if (sectionTitle == 'Borrador') {
                 final updatedSale = await Navigator.push<Map<String, dynamic>>(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditDraftSaleScreen(draftSale: sale), // Nueva pantalla para gestionar borradores
+                    builder: (context) => MySalesOdoo(initialSale: sale),
                   ),
                 );
 
                 if (updatedSale != null) {
                   setState(() {
-                    // Si la venta está marcada como completa, muévela a Guardados
+                    // Si la venta está marcada como completa, muévela a "Guardados"
                     if (updatedSale['status'] == 'completed') {
                       salesData['Borrador']!.remove(sale);
                       salesData['Guardados']!.add(updatedSale);
                     } else {
-                      // Actualiza la venta en Borrador
+                      // Actualiza la venta en "Borrador"
                       int index = salesData['Borrador']!.indexOf(sale);
                       if (index != -1) {
                         salesData['Borrador']![index] = updatedSale;

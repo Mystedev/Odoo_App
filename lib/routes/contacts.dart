@@ -25,7 +25,7 @@ class _MyEmployeesState extends State<MyEmployees> {
 
   Future<void> fetchApi() async {
     setState(() {
-      _contactsFuture = widget.contactsFuture; // Recargar contactos directamente desde la API
+      _contactsFuture = ApiFetch.fetchContacts(); // Recargar contactos directamente desde la API
     });
   }
 

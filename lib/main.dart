@@ -27,12 +27,10 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
-    // Ejecuta la autenticación y luego recupera los datos.
     _authenticateAndFetchData();
   }
 
   Future<void> _authenticateAndFetchData() async {
-    // Asegúrate de que la autenticación sea exitosa antes de obtener los productos y contactos
     await ApiFetch.authenticate();
     setState(() {
       _productsFuture = ApiFetch.fetchProducts();
@@ -60,21 +58,32 @@ class _MainAppState extends State<MainApp> {
         child: FutureBuilder<void>(
           future: ApiFetch.authenticate(),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error de autenticación: ${snapshot.error}'));
-            } else {
-              return AuthenticatedHomeScreen(
-                onThemeChanged: _toggleTheme,
-                contactsFuture: _contactsFuture,
-                productsFuture: _productsFuture,
-              );
-            }
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              switchInCurve: Curves.easeInOut,
+              switchOutCurve: Curves.easeInOut,
+              child: _buildBody(snapshot),
+            );
           },
         ),
       ),
     );
+  }
+
+  Widget _buildBody(AsyncSnapshot<void> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const SizedBox.shrink();
+    } else if (snapshot.hasError) {
+      return Center(
+        child: Text('Error de autenticación: ${snapshot.error}'),
+      );
+    } else {
+      return AuthenticatedHomeScreen(
+        onThemeChanged: _toggleTheme,
+        contactsFuture: _contactsFuture,
+        productsFuture: _productsFuture,
+      );
+    }
   }
 }
 
@@ -83,7 +92,7 @@ class AuthenticatedHomeScreen extends StatelessWidget {
   final Future<List<dynamic>> contactsFuture;
   final Future<List<dynamic>> productsFuture;
 
-  AuthenticatedHomeScreen({
+  const AuthenticatedHomeScreen({
     super.key,
     required this.onThemeChanged,
     required this.contactsFuture,
@@ -108,7 +117,7 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({
     super.key,
     required this.onThemeChanged,
-    required this.contactsFuture, 
+    required this.contactsFuture,
     required this.productsFuture,
   });
 
@@ -119,6 +128,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        foregroundColor: Colors.white,
         elevation: 0,
         actions: [
           IconButton(
@@ -127,7 +137,7 @@ class HomeScreen extends StatelessWidget {
             },
             icon: Icon(
               isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-              color: isDarkMode ? Colors.white : Colors.white,
+              color: Colors.white,
             ),
           ),
         ],
@@ -158,8 +168,7 @@ class HomeScreen extends StatelessWidget {
               title: const Text('Products'),
               onTap: () {
                 Navigator.of(context).push(
-                  _createRoute(
-                    MyProducts(productsFuture: productsFuture)));
+                    _createRoute(MyProducts(productsFuture: productsFuture)));
               },
             ),
             ListTile(
@@ -185,6 +194,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset("lib/assets/rb_2149227348.png"),
           Center(
