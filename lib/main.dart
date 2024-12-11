@@ -5,6 +5,7 @@ import 'package:odooapp/api/apiAccessOdoo.dart'; // Asegúrate de que esta ruta 
 import 'package:odooapp/routes/comandesPendents.dart';
 import 'package:odooapp/routes/contacts.dart';
 import 'package:odooapp/routes/products.dart';
+import 'package:odooapp/routes/rutes.dart';
 import 'package:odooapp/themes/theme.dart';
 
 void main() {
@@ -143,6 +144,7 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       drawer: Drawer(
+        width: 220,
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -157,7 +159,10 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Odoo DB',
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white),
                   ),
                   Icon(Icons.dashboard, size: 50, color: Colors.white),
                 ],
@@ -186,10 +191,16 @@ class HomeScreen extends StatelessWidget {
               leading: const Icon(Icons.shopping_cart),
               title: const Text('Comandes'),
               onTap: () {
-                Navigator.of(context)
-                    .push(_createRoute(const MyWaitingSales()));
+                Navigator.of(context).push(_createRoute(const MyWaitingSales()));
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.route),
+              title: const Text('Rutes'),
+              onTap: () {
+                Navigator.of(context).push(_createRoute(const MyRoutes()));
+              },
+            )
           ],
         ),
       ),
