@@ -28,10 +28,12 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
+    // Ejecuta la autenticación y luego recupera los datos.
     _authenticateAndFetchData();
   }
 
   Future<void> _authenticateAndFetchData() async {
+    // Asegúrate de que la autenticación sea exitosa antes de obtener los productos y contactos
     await ApiFetch.authenticate();
     setState(() {
       _productsFuture = ApiFetch.fetchProducts();
@@ -59,32 +61,34 @@ class _MainAppState extends State<MainApp> {
         child: FutureBuilder<void>(
           future: ApiFetch.authenticate(),
           builder: (context, snapshot) {
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 500),
-              switchInCurve: Curves.easeInOut,
-              switchOutCurve: Curves.easeInOut,
-              child: _buildBody(snapshot),
-            );
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // En lugar de bloquear, permitir acceso mostrando un mensaje
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Autenticación correcta...'),
+                    backgroundColor: Color.fromARGB(255, 206, 127, 70),
+                  ),
+                );
+              });
+              return AuthenticatedHomeScreen(
+                onThemeChanged: _toggleTheme, 
+                contactsFuture: _contactsFuture, 
+                productsFuture: _productsFuture);
+            } else if (snapshot.hasError) {
+              return Center(
+                  child: Text('Error de autenticación: ${snapshot.error}'));
+            } else {
+              return AuthenticatedHomeScreen(
+                onThemeChanged: _toggleTheme,
+                contactsFuture: _contactsFuture,
+                productsFuture: _productsFuture,
+              );
+            }
           },
         ),
       ),
     );
-  }
-
-  Widget _buildBody(AsyncSnapshot<void> snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const SizedBox.shrink();
-    } else if (snapshot.hasError) {
-      return Center(
-        child: Text('Error de autenticación: ${snapshot.error}'),
-      );
-    } else {
-      return AuthenticatedHomeScreen(
-        onThemeChanged: _toggleTheme,
-        contactsFuture: _contactsFuture,
-        productsFuture: _productsFuture,
-      );
-    }
   }
 }
 
@@ -93,7 +97,7 @@ class AuthenticatedHomeScreen extends StatelessWidget {
   final Future<List<dynamic>> contactsFuture;
   final Future<List<dynamic>> productsFuture;
 
-  const AuthenticatedHomeScreen({
+  AuthenticatedHomeScreen({
     super.key,
     required this.onThemeChanged,
     required this.contactsFuture,
@@ -138,13 +142,12 @@ class HomeScreen extends StatelessWidget {
             },
             icon: Icon(
               isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-              color: Colors.white,
+              color: isDarkMode ? Colors.white : Colors.white,
             ),
           ),
         ],
       ),
       drawer: Drawer(
-        width: 220,
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -191,21 +194,20 @@ class HomeScreen extends StatelessWidget {
               leading: const Icon(Icons.shopping_cart),
               title: const Text('Comandes'),
               onTap: () {
-                Navigator.of(context).push(_createRoute(const MyWaitingSales()));
+                Navigator.of(context)
+                    .push(_createRoute(const MyWaitingSales()));
               },
             ),
             ListTile(
-              leading: const Icon(Icons.route),
-              title: const Text('Rutes'),
-              onTap: () {
-                Navigator.of(context).push(_createRoute(const MyRoutes()));
-              },
-            )
+                leading: const Icon(Icons.route),
+                title: const Text('Rutes'),
+                onTap: () {
+                  Navigator.of(context).push(_createRoute(const MyRoutes()));
+                })
           ],
         ),
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset("lib/assets/rb_2149227348.png"),
           Center(

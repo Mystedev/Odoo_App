@@ -13,20 +13,21 @@ class _MyRoutesState extends State<MyRoutes> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 230, 244, 246),
+          //backgroundColor: const Color.fromARGB(255, 230, 244, 246),
           title: const Text(
             'Rutas',
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
           ),
-          foregroundColor: Colors.black,
+          foregroundColor: const Color.fromARGB(255, 255, 255, 255),
         ),
         body: Container(
           padding: const EdgeInsets.all(18),
           child: const Column(
             children: [
-              Text('Lista de rutas',style: TextStyle(
-                fontSize: 20
-              ),),
+              Text(
+                'Lista de rutas',
+                style: TextStyle(fontSize: 20),
+              ),
             ],
           ),
         ));
