@@ -21,8 +21,8 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  late Future<List<dynamic>> _productsFuture;
-  late Future<List<dynamic>> _contactsFuture;
+  late Future<List<dynamic>> _productsFuture = Future.value([]);
+  late Future<List<dynamic>> _contactsFuture = Future.value([]) ;
   ThemeMode _themeMode = ThemeMode.light;
 
   @override
@@ -173,7 +173,7 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.shop),
-              title: const Text('Products'),
+              title: const Text('Productos'),
               onTap: () {
                 Navigator.of(context).push(
                     _createRoute(MyProducts(productsFuture: productsFuture)));
@@ -181,7 +181,7 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.person),
-              title: const Text('Contacts'),
+              title: const Text('Contactos'),
               onTap: () {
                 Navigator.of(context).push(
                   _createRoute(
@@ -192,7 +192,7 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.shopping_cart),
-              title: const Text('Comandes'),
+              title: const Text('Ventas'),
               onTap: () {
                 Navigator.of(context)
                     .push(_createRoute(const MyWaitingSales()));
@@ -200,7 +200,7 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
                 leading: const Icon(Icons.route),
-                title: const Text('Rutes'),
+                title: const Text('Rutas'),
                 onTap: () {
                   Navigator.of(context).push(_createRoute(const MyRoutes()));
                 })
