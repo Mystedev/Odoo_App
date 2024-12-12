@@ -641,22 +641,19 @@ class ApiFetch {
 
     final response = await http.post(
       url,
-      headers:{
+      headers: {
         'Content-Type': 'application/json',
-        'Cookie':'session_id=$sessionId'
+        'Cookie': 'session_id=$sessionId'
       },
       body: json.encode({
-        "jsonrpc":"2.0",
-        "method":"call",
-        "params":{
-          "model":"x_rutas",
-          "method":"search_read",
-          "args":[],
+        "jsonrpc": "2.0",
+        "method": "call",
+        "params": {
+          "model": "x_rutas",
+          "method": "search_read",
+          "args": [],
           "kwargs": {
-            "fields":[
-              "x_name",
-              "x_studio_numero_ruta"
-            ]
+            "fields": ["x_name", "x_studio_numero_ruta"]
           }
         }
       }),
@@ -664,7 +661,7 @@ class ApiFetch {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      if (data['result']!= null) {
+      if (data['result'] != null) {
         print('Datos obtenidos: ${data['result']}');
         return List<dynamic>.from(data['result']);
       } else {
@@ -674,6 +671,4 @@ class ApiFetch {
       throw Exception('Error al recuperar las rutas.');
     }
   }
-
 }
-

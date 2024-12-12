@@ -70,7 +70,8 @@ class SalesHelper {
 
   static Future<void> showCustomerSelectionDialog(
     BuildContext context,
-    Function(int, String, String) onCustomerSelected, List<Map<String, dynamic>> contacts,
+    Function(int, String, String) onCustomerSelected,
+    List<Map<String, dynamic>> contacts,
   ) async {
     try {
       final customers = await ApiFetch.fetchContacts();
@@ -89,10 +90,10 @@ class SalesHelper {
                   return ListTile(
                     title: Text(customer['name']),
                     onTap: () {
-                      final vat = customer['vat'] != null &&
-                              customer['vat'] != 'false'
-                          ? customer['vat'].toString()
-                          : '';
+                      final vat =
+                          customer['vat'] != null && customer['vat'] != 'false'
+                              ? customer['vat'].toString()
+                              : '';
                       onCustomerSelected(customer['id'], customer['name'], vat);
                       Navigator.pop(context);
                     },

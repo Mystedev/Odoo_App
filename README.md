@@ -75,6 +75,7 @@ La aplicación utiliza las siguientes dependencias de Flutter:
 - `http`: Para realizar peticiones HTTP a la API de Odoo.
 - `shared_preferences`: Para almacenar en caché datos localmente.
 - `flutter/material.dart`: Para el diseño de la interfaz de usuario.
+- `flutter_speed_dial`: Desplegable para opciones en la interfaz de las listas de productos y contactos
 
 Puedes ver todas las dependencias en el archivo `pubspec.yaml`.
 

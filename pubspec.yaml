@@ -22,5 +22,4 @@ flutter:
   uses-material-design: true
 
   assets:
-   - lib/assets/4955653.jpg
    - lib/assets/rb_2149227348.png

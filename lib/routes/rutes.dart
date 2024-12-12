@@ -27,8 +27,6 @@ class _MyRoutesState extends State<MyRoutes> {
     },
   ];
 
-  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -190,23 +188,23 @@ class _RouteDetailsBottomSheetState extends State<RouteDetailsBottomSheet> {
                         ElevatedButton.icon(
                           onPressed: () {
                             // Acción para crear una nueva venta
-                            
                           },
                           icon: const Icon(Icons.add),
                           label: const Text('Nueva Venta'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 60, 117, 62),
+                            backgroundColor:
+                                const Color.fromARGB(255, 60, 117, 62),
                           ),
                         ),
                         ElevatedButton.icon(
                           onPressed: () {
                             // Acción para consultar ventas del cliente
-                            
                           },
                           icon: const Icon(Icons.list),
                           label: const Text('Ver Ventas'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 31, 63, 120),
+                            backgroundColor:
+                                const Color.fromARGB(255, 31, 63, 120),
                           ),
                         ),
                       ],
