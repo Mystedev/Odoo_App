@@ -188,10 +188,7 @@ class _RouteDetailsBottomSheetState extends State<RouteDetailsBottomSheet> {
                         ElevatedButton.icon(
                           onPressed: () {
                             // Acción para crear una nueva venta
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Crear nueva venta en $stop')),
-                            );
+                            
                           },
                           icon: const Icon(Icons.add),
                           label: const Text('Nueva Venta'),
@@ -202,10 +199,7 @@ class _RouteDetailsBottomSheetState extends State<RouteDetailsBottomSheet> {
                         ElevatedButton.icon(
                           onPressed: () {
                             // Acción para consultar ventas del cliente
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Consultando ventas de $stop')),
-                            );
+                            
                           },
                           icon: const Icon(Icons.list),
                           label: const Text('Ver Ventas'),

@@ -67,7 +67,7 @@ class _MainAppState extends State<MainApp> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Autenticación correcta...'),
-                    backgroundColor: Color.fromARGB(255, 206, 127, 70),
+                    backgroundColor: Color.fromARGB(255, 70, 206, 190),
                   ),
                 );
               });
@@ -75,9 +75,6 @@ class _MainAppState extends State<MainApp> {
                 onThemeChanged: _toggleTheme, 
                 contactsFuture: _contactsFuture, 
                 productsFuture: _productsFuture);
-            } else if (snapshot.hasError) {
-              return Center(
-                  child: Text('Error de autenticación: ${snapshot.error}'));
             } else {
               return AuthenticatedHomeScreen(
                 onThemeChanged: _toggleTheme,
@@ -148,6 +145,7 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       drawer: Drawer(
+        width: 230,
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[

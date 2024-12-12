@@ -418,6 +418,7 @@ class _MyProductsState extends State<MyProducts> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        foregroundColor: Colors.white,
         title: const Text('My Products'),
         actions: [
           IconButton(
