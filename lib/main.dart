@@ -103,7 +103,7 @@ class AuthenticatedHomeScreen extends StatelessWidget {
   final Future<List<dynamic>> contactsFuture;
   final Future<List<dynamic>> productsFuture;
 
-  AuthenticatedHomeScreen({
+  const AuthenticatedHomeScreen({
     super.key,
     required this.onThemeChanged,
     required this.contactsFuture,

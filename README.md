@@ -16,7 +16,7 @@ Flutter Odoo Manager es una aplicación móvil que permite gestionar y visualiza
 ### Prerrequisitos
 
 - **Flutter**: Asegúrate de tener instalado Flutter en tu entorno de desarrollo. Puedes seguir la guía de instalación oficial [aquí](https://flutter.dev/docs/get-started/install).
-- **Odoo**: Debes tener acceso a una instancia de Odoo con los módulos de `productos`, `contactos` y `pedidos` habilitados.
+- **Odoo**: Debes tener acceso a una instancia de Odoo con los módulos de `productos`, `contactos` , `pedidos` y un modulo personalizado  `rutas` habilitados.
 - **API de Odoo**: Configura la API para poder conectar la aplicación Flutter con tu servidor Odoo.
 
 ### Instrucciones
@@ -24,7 +24,7 @@ Flutter Odoo Manager es una aplicación móvil que permite gestionar y visualiza
 1. Clona este repositorio:
 
     ```bash
-    git clone https://github.com/tu-usuario/flutter-odoo-manager.git
+    git clone https://github.com/Mystedev/Odoo_App.git
     ```
 
 2. Instala las dependencias:
@@ -38,7 +38,7 @@ Flutter Odoo Manager es una aplicación móvil que permite gestionar y visualiza
     Abre `lib/api/apiAccessOdoo.dart` y modifica la variable `baseUrl` para que apunte a tu servidor Odoo:
 
     ```dart
-    const String baseUrl = 'https://tu-servidor-odoo.com';
+    const String baseUrl = 'https://localhost:8069/web/session/authenticate';
     ```
 
 4. Ejecuta la aplicación:
