@@ -51,8 +51,9 @@ class _MyRoutesState extends State<MyRoutes> {
         itemBuilder: (context, index) {
           final route = routes[index];
           return Card(
-            color: Colors.blue.shade50,
-            margin: const EdgeInsets.all(12),
+            margin: const EdgeInsets.all(8),
+            elevation: 4,
+            shadowColor: Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -78,14 +79,14 @@ class _MyRoutesState extends State<MyRoutes> {
                   LinearProgressIndicator(
                     value: route['progress'],
                     backgroundColor: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(10),
                     color: const  Color(0xFF00344D),
                   ),
-                  const SizedBox(height: 6),
                 ],
               ),
               trailing: const Icon(
                 Icons.info,
-                color: Color(0xFF00344D),
+                color: Colors.blueAccent,
               ),
               onTap: () {
                 // Mostrar el modal_bottom_sheet con los detalles de la ruta seleccionada
@@ -139,14 +140,14 @@ class RouteDetailsBottomSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            routeName,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          const Text(
+            'Actividad',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           const Text(
-            'Empresas a visitar:',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            'Ruta pendiente',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           // Lista de paradas con estilo más limpio
@@ -159,14 +160,6 @@ class RouteDetailsBottomSheet extends StatelessWidget {
               title: Text(stop),
             ),
           const SizedBox(height: 20),
-          Center(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Cierra el BottomSheet
-              },
-              child: const Text('Cerrar'),
-            ),
-          ),
         ],
       ),
     );
