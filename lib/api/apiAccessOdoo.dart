@@ -634,4 +634,46 @@ class ApiFetch {
       throw Exception('Error al eliminar órdenes: ${response.statusCode}');
     }
   }
+
+  static Future<List<dynamic>> fetchRoutes() async {
+    // Aquí puedes ejecutar la API para recuperar las rutas y luego mostrarlas
+    final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
+
+    final response = await http.post(
+      url,
+      headers:{
+        'Content-Type': 'application/json',
+        'Cookie':'session_id=$sessionId'
+      },
+      body: json.encode({
+        "jsonrpc":"2.0",
+        "method":"call",
+        "params":{
+          "model":"x_rutas",
+          "method":"search_read",
+          "args":[],
+          "kwargs": {
+            "fields":[
+              "x_name",
+              "x_studio_numero_ruta"
+            ]
+          }
+        }
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['result']!= null) {
+        print('Datos obtenidos: ${data['result']}');
+        return List<dynamic>.from(data['result']);
+      } else {
+        throw Exception('No se pudieron recuperar las rutas.');
+      }
+    } else {
+      throw Exception('Error al recuperar las rutas.');
+    }
+  }
+
 }
+

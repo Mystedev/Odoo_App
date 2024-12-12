@@ -1,4 +1,8 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, unused_field, prefer_final_fields
+
+import 'dart:async';
+import 'dart:convert';
+import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart'; // Asegúrate de que esta ruta sea correcta
@@ -22,13 +26,14 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   late Future<List<dynamic>> _productsFuture = Future.value([]);
-  late Future<List<dynamic>> _contactsFuture = Future.value([]) ;
+  late Future<List<dynamic>> _contactsFuture = Future.value([]);
+  late Future<List<dynamic>> _routesFuture = Future.value([]);
   ThemeMode _themeMode = ThemeMode.light;
 
   @override
   void initState() {
     super.initState();
-    // Ejecuta la autenticación y luego recupera los datos.
+    // Ejecuta la autenticación y luego recupera los datos al iniciar el estado del widget.
     _authenticateAndFetchData();
   }
 
@@ -36,8 +41,12 @@ class _MainAppState extends State<MainApp> {
     // Asegúrate de que la autenticación sea exitosa antes de obtener los productos y contactos
     await ApiFetch.authenticate();
     setState(() {
+      // Lista de productos obtenidos correctamente despues de la autenticación
       _productsFuture = ApiFetch.fetchProducts();
+      // Lista de contactos obtenidos correctamente despues de la autenticación
       _contactsFuture = ApiFetch.fetchContacts();
+      // Lista de rutas obtenidas correctamente despues de la autenticación
+      _routesFuture = ApiFetch.fetchRoutes();
     });
   }
 
@@ -72,9 +81,9 @@ class _MainAppState extends State<MainApp> {
                 );
               });
               return AuthenticatedHomeScreen(
-                onThemeChanged: _toggleTheme, 
-                contactsFuture: _contactsFuture, 
-                productsFuture: _productsFuture);
+                  onThemeChanged: _toggleTheme,
+                  contactsFuture: _contactsFuture,
+                  productsFuture: _productsFuture);
             } else {
               return AuthenticatedHomeScreen(
                 onThemeChanged: _toggleTheme,
