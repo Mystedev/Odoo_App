@@ -636,7 +636,7 @@ class ApiFetch {
   }
 
   static Future<List<dynamic>> fetchRoutes() async {
-    // Aquí puedes ejecutar la API para recuperar las rutas y luego mostrarlas
+    // Aquí puedes ejecutar la API para recuperar las rutas y guardarlas en una lista dinamica
     final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
 
     final response = await http.post(
