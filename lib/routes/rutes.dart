@@ -36,15 +36,6 @@ class _MyRoutesState extends State<MyRoutes> {
           style: TextStyle(color: Colors.white),
         ),
         foregroundColor: Colors.white,
-        actions: [
-          ElevatedButton(
-            style: const ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(Color.fromARGB(0, 255, 255, 255))
-            ),
-            onPressed: (){}, 
-            child: const Icon(Icons.replay)),
-          const SizedBox(width: 20,)
-        ],
       ),
       body: ListView.builder(
         itemCount: routes.length,
@@ -67,7 +58,8 @@ class _MyRoutesState extends State<MyRoutes> {
               ),
               title: Text(
                 route['routeName'],
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +72,7 @@ class _MyRoutesState extends State<MyRoutes> {
                     value: route['progress'],
                     backgroundColor: Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(10),
-                    color: const  Color(0xFF00344D),
+                    color: const Color(0xFF00344D),
                   ),
                 ],
               ),
@@ -92,7 +84,8 @@ class _MyRoutesState extends State<MyRoutes> {
                 // Mostrar el modal_bottom_sheet con los detalles de la ruta seleccionada
                 showModalBottomSheet(
                   context: context,
-                  isScrollControlled: true, // Permite que el modal ocupe más espacio
+                  isScrollControlled:
+                      true, // Permite que el modal ocupe más espacio
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(20),
@@ -122,7 +115,7 @@ class _MyRoutesState extends State<MyRoutes> {
   }
 }
 
-class RouteDetailsBottomSheet extends StatelessWidget {
+class RouteDetailsBottomSheet extends StatefulWidget {
   final String routeName;
   final List<String> stops;
 
@@ -133,6 +126,15 @@ class RouteDetailsBottomSheet extends StatelessWidget {
   });
 
   @override
+  _RouteDetailsBottomSheetState createState() =>
+      _RouteDetailsBottomSheetState();
+}
+
+class _RouteDetailsBottomSheetState extends State<RouteDetailsBottomSheet> {
+  // Track de qué cliente está expandido
+  String? expandedClient;
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(25.0),
@@ -140,26 +142,92 @@ class RouteDetailsBottomSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'Actividad',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          Text(
+            widget.routeName,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           const Text(
-            'Ruta pendiente',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            'Clientes:',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           // Lista de paradas con estilo más limpio
-          for (var stop in stops)
-            ListTile(
-              leading: const Icon(
-                Icons.business,
-                color: Color(0xFF00344D),
-              ),
-              title: Text(stop),
+          for (var stop in widget.stops)
+            Column(
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.business,
+                    color: Color(0xFF00344D),
+                  ),
+                  title: Text(stop),
+                  trailing: Icon(
+                    expandedClient == stop
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: Colors.blueAccent,
+                  ),
+                  onTap: () {
+                    setState(() {
+                      // Expande o contrae la sección de botones
+                      if (expandedClient == stop) {
+                        expandedClient = null;
+                      } else {
+                        expandedClient = stop;
+                      }
+                    });
+                  },
+                ),
+                if (expandedClient == stop)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // Acción para crear una nueva venta
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('Crear nueva venta en $stop')),
+                            );
+                          },
+                          icon: const Icon(Icons.add),
+                          label: const Text('Nueva Venta'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 60, 117, 62),
+                          ),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // Acción para consultar ventas del cliente
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('Consultando ventas de $stop')),
+                            );
+                          },
+                          icon: const Icon(Icons.list),
+                          label: const Text('Ver Ventas'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 31, 63, 120),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const Divider(), // Línea separadora entre cada cliente
+              ],
             ),
           const SizedBox(height: 20),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Cierra el BottomSheet
+              },
+              child: const Text('Cerrar'),
+            ),
+          ),
         ],
       ),
     );
