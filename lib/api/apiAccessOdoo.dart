@@ -86,6 +86,64 @@ class ApiFetch {
     }
   }
 
+  static Future<List<Map<String, dynamic>>> fetchContactsByIds(List<int> contactIds) async {
+    /*
+      La peticion de las utas obtiene la id , pero esta id resulta ser la id de la relacion One2Many con los contacots,
+      por lo tanto debemos recibir el cuerpo de la relacion de estos para poder obtener los campos que hacen referencia
+      a los contactos con su propio id.
+    */ 
+  final url = Uri.parse(
+      'http://10.0.2.2:8069/web/dataset/call_kw'); // URL de tu API Odoo.
+
+  try {
+    // Construcción de los parámetros que requiere Odoo
+    final body = {
+      'jsonrpc': '2.0',
+      'method': 'call',
+      'params': {
+        'model': 'res.partner', 
+        'method': 'search_read', // Método de para buscar y leer registros.
+        'args': [
+          [
+            ['id', 'in', contactIds], // Filtrado por los IDs de los contactos.
+          ],
+        ],
+        'kwargs': {
+          'fields': ['name', 'email', 'phone'], // Campos del modulo
+        },
+      },
+      'id': 1, 
+    };
+
+    // Realiza la solicitud POST con los IDs de los contactos para obtener el cuerpo de la relacion 
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': 'session_id=$sessionId',
+      },
+      body: jsonEncode(body),
+    );
+
+    // Verifica si la solicitud fue exitosa
+    if (response.statusCode == 200) {
+      // Decodifica la respuesta JSON y extrae los resultados
+      final jsonResponse = jsonDecode(response.body);
+      final List<dynamic> data = jsonResponse['result'] ?? [];
+
+      // Convierte la lista de contactos en una lista de mapas (detalles de los contactos)
+      List<Map<String, dynamic>> contactDetails = data.cast<Map<String, dynamic>>();
+
+      return contactDetails; // Devuelve la lista de contactos con sus detalles.
+    } else {
+      throw Exception(
+          'Error al obtener los detalles de los contactos. Código: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error en la solicitud: $e');
+  }
+}
+
   static Future<void> addContact(
       String name, String email, String phone) async {
     final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
@@ -653,7 +711,11 @@ class ApiFetch {
           "method": "search_read",
           "args": [],
           "kwargs": {
-            "fields": ["x_name", "x_studio_numero_ruta"]
+            "fields": [
+              "x_name",
+              "x_studio_numero_ruta",
+              "x_studio_one2many_field_2en_1ievjou3p"
+            ]
           }
         }
       }),
@@ -671,4 +733,6 @@ class ApiFetch {
       throw Exception('Error al recuperar las rutas.');
     }
   }
+
+  // Función que obtiene detalles de contactos a partir de una lista de IDs
 }
