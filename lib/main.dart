@@ -74,7 +74,7 @@ class _MainAppState extends State<MainApp> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Autenticación correcta...'),
-                    backgroundColor: Color.fromARGB(255, 70, 206, 190),
+                    backgroundColor: Color.fromARGB(255, 33, 144, 131),
                   ),
                 );
               });
@@ -212,21 +212,13 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Image.asset("lib/assets/rb_2149227348.png"),
-          Center(
-            child: Text(
-              'Odoo DB',
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.w700,
-                color: textColor,
-              ),
-            ),
-          ),
-        ],
-      ),
+      body: const Center(
+        child: Text('Odoo DB',style: TextStyle(
+          fontSize: 30,
+          fontWeight: FontWeight.w700,
+          color: Colors.deepPurple,
+        ),),
+      )
     );
   }
 }
