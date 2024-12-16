@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
-import 'package:odooapp/routes/comandes.dart';
 
 class MyRoutes extends StatefulWidget {
-  const MyRoutes({super.key});
+  final Future<List<dynamic>> routesFuture;
+
+  const MyRoutes({super.key, required this.routesFuture});
 
   @override
   State<MyRoutes> createState() => _MyRoutesState();
 }
 
 class _MyRoutesState extends State<MyRoutes> {
-  late Future<List<dynamic>> _routesInfo;
+  late Future<List<dynamic>> _routes = Future.value([]);
 
   @override
   void initState() {
     super.initState();
-    _routesInfo = ApiFetch.fetchRoutes();
+    _routes = widget.routesFuture;
   }
 
   // Llamada para obtener los detalles de los contactos por ID
@@ -37,7 +38,7 @@ class _MyRoutesState extends State<MyRoutes> {
         foregroundColor: Colors.white,
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: _routesInfo,
+        future: _routes,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -243,7 +244,6 @@ class _RouteDetailsBottomSheetState extends State<RouteDetailsBottomSheet> {
                       ],
                     ),
                   ),
-                const Divider(), // Línea separadora entre cada cliente
               ],
             ),
         ],

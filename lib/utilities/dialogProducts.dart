@@ -2,8 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
-class DialogHelpersProducts{
-  static void showAddProductDialog(BuildContext context,VoidCallback fetchApi) {
+
+class DialogHelpersProducts {
+  static void showAddProductDialog(
+      BuildContext context, VoidCallback fetchApi) {
     final nameController = TextEditingController();
     final listPriceController = TextEditingController();
     final costController = TextEditingController();
@@ -85,7 +87,8 @@ class DialogHelpersProducts{
     );
   }
 
-  static void showDeleteProductDialog(BuildContext context,Future<List<dynamic>> _productsFuture,VoidCallback fetchApi) async {
+  static void showDeleteProductDialog(BuildContext context,
+      Future<List<dynamic>> _productsFuture, VoidCallback fetchApi) async {
     try {
       final products = await _productsFuture; // Obtener productos
 
@@ -187,7 +190,8 @@ class DialogHelpersProducts{
     }
   }
 
-  static void showUpdateProductDialog(BuildContext context,Future<List<dynamic>> _productsFuture,VoidCallback fetchApi) async {
+  static void showUpdateProductDialog(BuildContext context,
+      Future<List<dynamic>> _productsFuture, VoidCallback fetchApi) async {
     try {
       final products = await _productsFuture; // Obtener productos
 
@@ -283,8 +287,13 @@ class DialogHelpersProducts{
     }
   }
 
-  static void _showEditProductDialog(BuildContext context, int productId,
-      String initialName, double initialListPrice, double initialCost,VoidCallback fetchApi) {
+  static void _showEditProductDialog(
+      BuildContext context,
+      int productId,
+      String initialName,
+      double initialListPrice,
+      double initialCost,
+      VoidCallback fetchApi) {
     final nameController = TextEditingController(text: initialName);
     final listPriceController =
         TextEditingController(text: initialListPrice.toString());

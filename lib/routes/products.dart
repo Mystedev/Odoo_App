@@ -1,12 +1,9 @@
 // ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api, avoid_print, unused_element
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:odooapp/utilities/dialogProducts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MyProducts extends StatefulWidget {
   final Future<List<dynamic>> productsFuture;
