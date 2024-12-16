@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
+import 'package:odooapp/routes/comandes.dart';
 
 class MyRoutes extends StatefulWidget {
   const MyRoutes({super.key});
@@ -219,7 +220,7 @@ class _RouteDetailsBottomSheetState extends State<RouteDetailsBottomSheet> {
                       children: [
                         ElevatedButton.icon(
                           onPressed: () {
-                            // Acción para crear una nueva venta
+                            //Navigator.push(context, MySalesOdoo(initialSale: initialSale));
                           },
                           icon: const Icon(Icons.add),
                           label: const Text('Nueva Venta'),
@@ -230,7 +231,7 @@ class _RouteDetailsBottomSheetState extends State<RouteDetailsBottomSheet> {
                         ),
                         ElevatedButton.icon(
                           onPressed: () {
-                            // Acción para consultar ventas del cliente
+                            // Accion para consultar las ventas filtrando por el id del contacto selecionado
                           },
                           icon: const Icon(Icons.list),
                           label: const Text('Ver Ventas'),

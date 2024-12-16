@@ -1,9 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api, unused_field, prefer_final_fields
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:core';
-
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart'; // Asegúrate de que esta ruta sea correcta
 import 'package:odooapp/routes/comandesPendents.dart';

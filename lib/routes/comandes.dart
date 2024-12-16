@@ -1,7 +1,4 @@
-// ignore_for_file: unused_element
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert'; // Para manejar JSON de SharedPreferences
 import 'package:odooapp/api/apiAccessOdoo.dart';
 import 'package:odooapp/utilities/salesHelpers.dart';
 
@@ -16,6 +13,8 @@ class MySalesOdoo extends StatefulWidget {
 
 class _MySalesOdooState extends State<MySalesOdoo> {
   List<Map<String, dynamic>> _products = [];
+  late Future<List<dynamic>> _contactList = Future.value();
+  late Future<List<dynamic>> _productList;
   int? _selectedCustomerId;
   int? _selectedProductId;
   String _selectedCustomerName = '';
@@ -31,6 +30,8 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   void initState() {
     super.initState();
     _loadInitialData();
+    _contactList = _loadContactsFromAPI();
+    _productList = _loadProductsFromAPI();
   }
 
   // Cargar datos iniciales de la venta o borrador
@@ -46,24 +47,24 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     }
   }
 
-  // Cargar contactos guardados en SharedPreferences
-  Future<List<Map<String, dynamic>>> _loadContactsFromCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('contacts');
-    if (jsonString != null) {
-      return List<Map<String, dynamic>>.from(jsonDecode(jsonString));
+  // Obtener contactos desde la API
+  Future<List<dynamic>> _loadContactsFromAPI() async {
+    try {
+      return await ApiFetch
+          .fetchContacts(); // Usamos la API para obtener contactos
+    } catch (e) {
+      throw Exception('Error al obtener contactos: $e');
     }
-    return [];
   }
 
-  // Cargar productos guardados en SharedPreferences
-  Future<List<Map<String, dynamic>>> _loadProductsFromCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('products');
-    if (jsonString != null) {
-      return List<Map<String, dynamic>>.from(jsonDecode(jsonString));
+  // Obtener productos desde la API
+  Future<List<dynamic>> _loadProductsFromAPI() async {
+    try {
+      return await ApiFetch
+          .fetchProducts(); // Usamos la API para obtener productos
+    } catch (e) {
+      throw Exception('Error al obtener productos: $e');
     }
-    return [];
   }
 
   @override
@@ -111,54 +112,57 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   }
 
   Widget _buildCustomerCard() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _loadContactsFromCache(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Text('No se pudieron cargar los contactos.');
-        }
+  return FutureBuilder<List<dynamic>>(
+    future: _contactList,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+        return const Text('No se pudieron cargar los contactos.');
+      }
 
-        final contacts = snapshot.data!;
-        return Card(
-          elevation: 2,
-          child: ListTile(
-            onTap: () => SalesHelper.showCustomerSelectionDialog(
-              context,
-              (id, name, vat) {
-                setState(() {
-                  _selectedCustomerId = id;
-                  _selectedCustomerName = name;
-                  _selectedCustomerVat = vat;
-                });
-              },
-              contacts, // Pasamos los contactos cargados
-            ),
-            title: const Text('Seleccionar Cliente'),
-            subtitle: Row(
-              children: [
-                const Icon(Icons.person_2),
-                const SizedBox(width: 15),
-                Text(
-                  _selectedCustomerName.isEmpty
-                      ? 'Ningún cliente seleccionado'
-                      : _selectedCustomerName,
-                ),
-                const SizedBox(width: 15),
-                Text(
-                  (_selectedCustomerVat == 'false' || _selectedCustomerVat.isEmpty)
-                      ? ''
-                      : _selectedCustomerVat,
-                )
-              ],
-            ),
-            trailing: const Icon(Icons.arrow_drop_down),
+      // Convierte la lista dinámica a una lista de Map<String, dynamic>
+      final List<Map<String, dynamic>> contacts = List<Map<String, dynamic>>.from(snapshot.data!);
+
+      return Card(
+        elevation: 2,
+        child: ListTile(
+          onTap: () => SalesHelper.showCustomerSelectionDialog(
+            context,
+            (id, name, vat) {
+              setState(() {
+                _selectedCustomerId = id;
+                _selectedCustomerName = name;
+                _selectedCustomerVat = vat;
+              });
+            },
+            contacts, // Pasamos la lista de contactos convertida correctamente
           ),
-        );
-      },
-    );
-  }
+          title: const Text('Seleccionar Cliente'),
+          subtitle: Row(
+            children: [
+              const Icon(Icons.person_2),
+              const SizedBox(width: 15),
+              Text(
+                _selectedCustomerName.isEmpty
+                    ? 'Ningún cliente seleccionado'
+                    : _selectedCustomerName,
+              ),
+              const SizedBox(width: 15),
+              Text(
+                (_selectedCustomerVat == 'false' || _selectedCustomerVat.isEmpty)
+                    ? ''
+                    : _selectedCustomerVat,
+              )
+            ],
+          ),
+          trailing: const Icon(Icons.arrow_drop_down),
+        ),
+      );
+    },
+  );
+}
+
 
   Widget _buildDateField() {
     return TextField(
@@ -175,12 +179,14 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   }
 
   Widget _buildProductForm() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _loadProductsFromCache(),
+    return FutureBuilder<List<dynamic>>(
+      future: _productList,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+        } else if (snapshot.hasError ||
+            !snapshot.hasData ||
+            snapshot.data!.isEmpty) {
           return const Text('No se pudieron cargar los productos.');
         }
 
@@ -325,7 +331,8 @@ class _MySalesOdooState extends State<MySalesOdoo> {
                 'totalAmount': _totalAmount.toString(),
               };
 
-              Navigator.pop(context, draftSale); // Devuelve el borrador actualizado
+              Navigator.pop(
+                  context, draftSale); // Devuelve el borrador actualizado
             },
             child: const Text('Guardar Borrador'),
           ),
