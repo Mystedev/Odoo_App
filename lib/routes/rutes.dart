@@ -35,6 +35,14 @@ class _MyRoutesState extends State<MyRoutes> {
           'Rutas',
           style: TextStyle(color: Colors.white),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.replay),
+            onPressed: () {
+              _routes = ApiFetch.fetchRoutes();
+            },
+          )
+        ],
         foregroundColor: Colors.white,
       ),
       body: FutureBuilder<List<dynamic>>(
@@ -105,7 +113,7 @@ class _MyRoutesState extends State<MyRoutes> {
                           // Lista de los nombres de las empresas obtenidas
 
                           LinearProgressIndicator(
-                            value: 0.0, // Ajusta con progreso real si lo tienes
+                            value: 0.7, // Ajusta con progreso real si lo tienes
                             backgroundColor: Colors.grey.shade300,
                             borderRadius: BorderRadius.circular(10),
                             color: const Color(0xFF00344D),
