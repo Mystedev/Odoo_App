@@ -1,14 +1,10 @@
-// ignore_for_file: library_private_types_in_public_api, unused_field, prefer_final_fields
+// ignore_for_file: library_private_types_in_public_api, unused_field, prefer_final_fields, unused_element
 
 import 'dart:async';
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:odooapp/HomeScreen.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart'; // Asegúrate de que esta ruta sea correcta
-import 'package:odooapp/routes/comandesPendents.dart';
-import 'package:odooapp/routes/contacts.dart';
-import 'package:odooapp/routes/products.dart';
-import 'package:odooapp/routes/rutes.dart';
 import 'package:odooapp/themes/theme.dart';
 
 void main() {

@@ -100,7 +100,7 @@ class _MyWaitingSalesState extends State<MyWaitingSales> {
     const TextStyle pendingTitleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
-      color: Color.fromARGB(255, 130, 199, 120), // Color para 'Pendientes de enviar'
+      color: Color.fromARGB(255, 104, 158, 96), // Color para 'Pendientes de enviar'
     );
 
     const TextStyle savedTitleStyle = TextStyle(

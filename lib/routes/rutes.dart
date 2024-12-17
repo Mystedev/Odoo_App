@@ -1,5 +1,8 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
+import 'package:odooapp/routes/comandes.dart';
 
 class MyRoutes extends StatefulWidget {
   final Future<List<dynamic>> routesFuture;
@@ -229,7 +232,17 @@ class _RouteDetailsBottomSheetState extends State<RouteDetailsBottomSheet> {
                       children: [
                         ElevatedButton.icon(
                           onPressed: () {
-                            //Navigator.push(context, MySalesOdoo(initialSale: initialSale));
+                            final Map<String, dynamic> initialSale = {
+                              'client_name': stop, // Asigna el nombre del cliente actual
+                            };
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MySalesOdoo(initialSale: initialSale),
+                              ),
+                            );
                           },
                           icon: const Icon(Icons.add),
                           label: const Text('Nueva Venta'),

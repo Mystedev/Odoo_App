@@ -1,4 +1,4 @@
-// ignore_for_file: null_argument_to_non_null_type
+// ignore_for_file: null_argument_to_non_null_type, use_build_context_synchronously, unused_field
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
@@ -22,7 +22,11 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   String _selectedCustomerName = '';
   String _selectedCustomerVat = '';
   double _totalAmount = 0.0;
-
+  String clientName = '';
+  // InitialSale recibido desde las rutas, este es el nombre del contacto en el que se desea añadir una venta
+  final TextEditingController _customerSearchController =
+      TextEditingController();
+  // Controladores para los datos introducidos en los dialogos
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _productNameController = TextEditingController();
   final TextEditingController _unitPriceController = TextEditingController();
@@ -39,6 +43,8 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   // Cargar datos iniciales de la venta o borrador
   void _loadInitialData() {
     if (widget.initialSale.isNotEmpty) {
+      // La siguiente variable se utiliza para modificar el nombre autorellenado
+      // del campo de búsqueda de clientes
       _selectedCustomerName = widget.initialSale['customerName'] ?? '';
       _selectedCustomerVat = widget.initialSale['vat'] ?? '';
       _dateController.text = widget.initialSale['date'] ?? '';
@@ -46,6 +52,8 @@ class _MySalesOdooState extends State<MySalesOdoo> {
           List<Map<String, dynamic>>.from(widget.initialSale['products'] ?? []);
       _totalAmount =
           double.tryParse(widget.initialSale['totalAmount'] ?? '0.0') ?? 0.0;
+      // Nombre del cliente en el campo de busqueda
+      _selectedCustomerName = widget.initialSale['client_name'] ?? '';
     }
   }
 
@@ -114,57 +122,60 @@ class _MySalesOdooState extends State<MySalesOdoo> {
   }
 
   Widget _buildCustomerCard() {
-  return FutureBuilder<List<dynamic>>(
-    future: _contactList,
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-        return const Text('No se pudieron cargar los contactos.');
-      }
+    return FutureBuilder<List<dynamic>>(
+      future: _contactList,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError ||
+            !snapshot.hasData ||
+            snapshot.data!.isEmpty) {
+          return const Text('No se pudieron cargar los contactos.');
+        }
 
-      // Convierte la lista dinámica a una lista de Map<String, dynamic>
-      final List<Map<String, dynamic>> contacts = List<Map<String, dynamic>>.from(snapshot.data!);
+        // Convierte la lista dinámica a una lista de Map<String, dynamic>
+        final List<Map<String, dynamic>> contacts =
+            List<Map<String, dynamic>>.from(snapshot.data!);
 
-      return Card(
-        elevation: 2,
-        child: ListTile(
-          onTap: () => SalesHelper.showCustomerSelectionDialog(
-            context,
-            (id, name, vat) {
-              setState(() {
-                _selectedCustomerId = id;
-                _selectedCustomerName = name;
-                _selectedCustomerVat = vat;
-              });
-            },
-            contacts, // Pasamos la lista de contactos convertida correctamente
+        return Card(
+          elevation: 2,
+          child: ListTile(
+            onTap: () => SalesHelper.showCustomerSelectionDialog(
+              context,
+              (id, name, vat) {
+                setState(() {
+                  _selectedCustomerId = id;
+                  _selectedCustomerName = name;
+                  _selectedCustomerVat = vat;
+                });
+              },
+              contacts, // Pasamos la lista de contactos convertida correctamente
+            ),
+            title: const Text('Seleccionar Cliente'),
+            subtitle: Row(
+              children: [
+                const Icon(Icons.person_2),
+                const SizedBox(width: 15),
+                Text(
+                  _selectedCustomerName.isEmpty
+                      ? 'Ningún cliente seleccionado'
+                      : _selectedCustomerName,
+                ),
+                const SizedBox(width: 15),
+                Text(
+                  (_selectedCustomerVat == 'false' ||
+                          _selectedCustomerVat.isEmpty)
+                      ? ''
+                      : _selectedCustomerVat,
+                )
+              ],
+            ),
+            trailing: const Icon(Icons.arrow_drop_down),
           ),
-          title: const Text('Seleccionar Cliente'),
-          subtitle: Row(
-            children: [
-              const Icon(Icons.person_2),
-              const SizedBox(width: 15),
-              Text(
-                _selectedCustomerName.isEmpty
-                    ? 'Ningún cliente seleccionado'
-                    : _selectedCustomerName,
-              ),
-              const SizedBox(width: 15),
-              Text(
-                (_selectedCustomerVat == 'false' || _selectedCustomerVat.isEmpty)
-                    ? ''
-                    : _selectedCustomerVat,
-              )
-            ],
-          ),
-          trailing: const Icon(Icons.arrow_drop_down),
-        ),
-      );
-    },
-  );
-}
-
+        );
+      },
+    );
+  }
 
   Widget _buildDateField() {
     return TextField(
