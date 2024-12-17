@@ -87,7 +87,7 @@ class HomeScreen extends StatelessWidget {
                 title: const Text('Ventas'),
                 onTap: () {
                   Navigator.of(context)
-                      .push(_createRoute(const MyWaitingSales()));
+                      .push(_createRoute(const MyWaitingSales(filterById: null,)));
                 },
               ),
               ListTile(

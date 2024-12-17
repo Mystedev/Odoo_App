@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'package:flutter/material.dart';
 import 'package:odooapp/routes/comandes.dart';
 import 'package:odooapp/widgets/widgetsVentas/salesSectionPendents.dart';
@@ -5,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class MyWaitingSales extends StatefulWidget {
-  const MyWaitingSales({super.key});
+  const MyWaitingSales({super.key, required filterById});
 
   @override
   State<MyWaitingSales> createState() => _MyWaitingSalesState();
@@ -112,7 +114,7 @@ class _MyWaitingSalesState extends State<MyWaitingSales> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gestión de Ventas'),
-        centerTitle: true, // Centrar el título
+        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
@@ -171,9 +173,7 @@ class _MyWaitingSalesState extends State<MyWaitingSales> {
           final newSale = await Navigator.push<Map<String, dynamic>>(
             context,
             MaterialPageRoute(
-                builder: (context) => const MySalesOdoo(
-                      initialSale: {},
-                    )),
+                builder: (context) => const MySalesOdoo(initialSale: {},)),
           );
 
           if (newSale != null) {
@@ -200,3 +200,20 @@ class _MyWaitingSalesState extends State<MyWaitingSales> {
   }
 }
 
+Route _createRoute(Widget page) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.easeInOut;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
+}

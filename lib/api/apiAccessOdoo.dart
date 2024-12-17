@@ -114,7 +114,11 @@ class ApiFetch {
             ],
           ],
           'kwargs': {
-            'fields': ['name', 'email', 'phone'], // Campos del modulo
+            'fields': [
+              'name',
+              'email',
+              'phone'
+            ], // Campos que requiere el modulo
           },
         },
         'id': 1,
@@ -740,5 +744,53 @@ class ApiFetch {
     }
   }
 
-  // Función que obtiene detalles de contactos a partir de una lista de IDs
+  static Future<List<Map<String, dynamic>>> fetchSales(int clientId) async {
+    final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie':
+            'session_id=$sessionId', // Asegúrate de que sessionId sea válido
+      },
+      body: jsonEncode({
+        "jsonrpc": "2.0",
+        "method": "call",
+        "params": {
+          "model": "sale.order",
+          "method": "search_read",
+          "args": [
+            [
+              ["partner_id", "=", clientId] // Filtrar por ID del cliente
+            ]
+          ],
+          "kwargs": {
+            "fields": [
+              "id",
+              "partner_id",
+              "date_order",
+              "amount_total"
+            ], // Campos a recuperar
+            "limit": 100, // Limitar resultados si es necesario
+          },
+        },
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data['result'] != null) {
+        return List<Map<String, dynamic>>.from(
+            data['result']); // Retornar lista de ventas
+      } else {
+        throw Exception(
+            'Error en la respuesta: ${data['error']['data']['message']}');
+      }
+    } else {
+      throw Exception(
+          'Error en la comunicación: ${response.statusCode}, ${response.body}');
+    }
+  }
 }

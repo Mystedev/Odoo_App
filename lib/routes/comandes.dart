@@ -57,7 +57,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     }
   }
 
-  // Obtener contactos desde la API
+  // Obtener contactos desde la API devolviendo una lista actualizada
   Future<List<dynamic>> _loadContactsFromAPI() async {
     try {
       return await ApiFetch
@@ -67,7 +67,7 @@ class _MySalesOdooState extends State<MySalesOdoo> {
     }
   }
 
-  // Obtener productos desde la API
+  // Obtener productos desde la API devolviendo una lista actualizada
   Future<List<dynamic>> _loadProductsFromAPI() async {
     try {
       return await ApiFetch
@@ -83,6 +83,17 @@ class _MySalesOdooState extends State<MySalesOdoo> {
       appBar: AppBar(
         title: const Text('Nueva Venta'),
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+              onPressed: () {
+                // Botón para recargar las listas, ya que a veces pueden fallar.
+                setState(() {
+                  _contactList = _loadContactsFromAPI();
+                  _productList = _loadProductsFromAPI();
+                });
+              },
+              icon: const Icon(Icons.replay))
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -132,7 +143,6 @@ class _MySalesOdooState extends State<MySalesOdoo> {
             snapshot.data!.isEmpty) {
           return const Text('No se pudieron cargar los contactos.');
         }
-
         // Convierte la lista dinámica a una lista de Map<String, dynamic>
         final List<Map<String, dynamic>> contacts =
             List<Map<String, dynamic>>.from(snapshot.data!);

@@ -1,8 +1,9 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, non_constant_identifier_names
 
 import 'package:flutter/material.dart';
 import 'package:odooapp/api/apiAccessOdoo.dart';
 import 'package:odooapp/routes/comandes.dart';
+import 'package:odooapp/routes/comandesPendents.dart';
 
 class MyRoutes extends StatefulWidget {
   final Future<List<dynamic>> routesFuture;
@@ -76,11 +77,11 @@ class _MyRoutesState extends State<MyRoutes> {
                   if (contactsSnapshot.connectionState ==
                       ConnectionState.waiting) {
                     return const ListTile(
-                      title: Text('Cargando contactos...'),
+                      title: Text('Cargando rutas...'),
                     );
                   } else if (contactsSnapshot.hasError) {
                     return ListTile(
-                      title: const Text('Error al cargar contactos'),
+                      title: const Text('Error al cargar las rutas'),
                       subtitle: Text(contactsSnapshot.error.toString()),
                     );
                   }
@@ -147,7 +148,7 @@ class _MyRoutesState extends State<MyRoutes> {
                                     stops: contactDetails
                                         .map<String>(
                                             (contact) => contact['name'])
-                                        .toList(),
+                                        .toList(), contactDetails: contactDetails,
                                   ),
                                 );
                               },
@@ -169,12 +170,14 @@ class _MyRoutesState extends State<MyRoutes> {
 
 class RouteDetailsBottomSheet extends StatefulWidget {
   final String routeName;
+  final List<Map<String, dynamic>> contactDetails;
   final List<String> stops;
 
   const RouteDetailsBottomSheet({
     super.key,
     required this.routeName,
     required this.stops,
+    required this.contactDetails,
   });
 
   @override
@@ -233,7 +236,8 @@ class _RouteDetailsBottomSheetState extends State<RouteDetailsBottomSheet> {
                         ElevatedButton.icon(
                           onPressed: () {
                             final Map<String, dynamic> initialSale = {
-                              'client_name': stop, // Asigna el nombre del cliente actual
+                              'client_name':
+                                  stop, // Asigna el nombre del cliente actual
                             };
 
                             Navigator.push(
@@ -252,8 +256,117 @@ class _RouteDetailsBottomSheetState extends State<RouteDetailsBottomSheet> {
                           ),
                         ),
                         ElevatedButton.icon(
-                          onPressed: () {
-                            // Accion para consultar las ventas filtrando por el id del contacto selecionado
+                          onPressed: () async {
+                            // Recuperar el ID del cliente basado en el nombre del cliente seleccionado
+                            final client = widget.contactDetails.firstWhere(
+                              (contact) => contact['name'] == stop,
+                            );
+
+                            if (client != null && client['id'] != null) {
+                              final clientId = client['id'];
+
+                              try {
+                                // Llamar a la API para obtener las ventas filtradas por cliente
+                                final clientSales =
+                                    await ApiFetch.fetchSales(clientId);
+
+                                // Mostrar las ventas en un ModalBottomSheet
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(20)),
+                                  ),
+                                  builder: (BuildContext context) {
+                                    return FractionallySizedBox(
+                                      heightFactor: 0.8,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Ventas del Cliente',
+                                              style: TextStyle(
+                                                  fontSize: 22,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            if (clientSales.isEmpty)
+                                              const Text(
+                                                  'Este cliente no tiene ventas registradas.'),
+                                            if (clientSales.isNotEmpty)
+                                              Expanded(
+                                                child: ListView.builder(
+                                                  itemCount: clientSales.length,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    final sale =
+                                                        clientSales[index];
+                                                    return Card(
+                                                      margin: const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 8.0),
+                                                      child: ListTile(
+                                                        leading: const Icon(
+                                                            Icons.receipt,
+                                                            color: Colors.blue),
+                                                        title: Text(sale[
+                                                                'sale_name'] ??
+                                                            'Venta ${index + 1}'),
+                                                        subtitle: Text(
+                                                            'Fecha: ${sale['date_order'] ?? 'Desconocida'}'),
+                                                        trailing: Text(
+                                                            'Total: \$${sale['amount_total']}'),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.pop(
+                                                    context); // Cerrar el Modal
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.redAccent,
+                                              ),
+                                              child: const Text('Cerrar'),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              } catch (error) {
+                                // Manejo de errores
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Error'),
+                                    content: Text(
+                                        'No se pudieron cargar las ventas: $error'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Cerrar'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                            } else {
+                              // Si el cliente no tiene un ID válido
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'No se pudo obtener el ID del cliente.')),
+                              );
+                            }
                           },
                           icon: const Icon(Icons.list),
                           label: const Text('Ver Ventas'),
