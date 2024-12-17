@@ -751,8 +751,7 @@ class ApiFetch {
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Cookie':
-            'session_id=$sessionId', // Asegúrate de que sessionId sea válido
+        'Cookie': 'session_id=$sessionId', // Asegúrate de que sessionId sea válido
       },
       body: jsonEncode({
         "jsonrpc": "2.0",
@@ -768,11 +767,12 @@ class ApiFetch {
           "kwargs": {
             "fields": [
               "id",
+              "name",
               "partner_id",
               "date_order",
               "amount_total"
             ], // Campos a recuperar
-            "limit": 100, // Limitar resultados si es necesario
+            "limit": 10, // Limitar resultados si es necesario
           },
         },
       }),

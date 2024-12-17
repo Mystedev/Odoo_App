@@ -1,7 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:odooapp/api/apiAccessOdoo.dart';
+import 'package:odooapp/api/apiAccess.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:odooapp/utilities/dialogContacts.dart';
 
@@ -139,7 +139,7 @@ class _MyEmployeesState extends State<MyEmployees> {
                           Text('VAT: ${contact['vat'] ?? 'No VAT'}'),
                         ],
                       ),
-                      trailing: const Icon(Icons.info_sharp,color:  Color(0xFF00344D)),
+                      trailing: const Icon(Icons.info_sharp,color:  Color.fromARGB(255, 15, 132, 186)),
                     ),
                   ),
                 ],

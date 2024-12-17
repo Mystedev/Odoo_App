@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api, avoid_print, unused_element
 
 import 'package:flutter/material.dart';
-import 'package:odooapp/api/apiAccessOdoo.dart';
+import 'package:odooapp/api/apiAccess.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:odooapp/utilities/dialogProducts.dart';
 
@@ -72,7 +72,7 @@ class _MyProductsState extends State<MyProducts> {
                 ),
                 subtitle:
                     Text('Sales Price: \$${product['list_price'] ?? 'N/A'}'),
-                trailing: const Icon(Icons.shop, color: Color(0xFF00344D)),
+                trailing: const Icon(Icons.shop, color: Color.fromARGB(255, 15, 132, 186)),
                 onTap: () {
                   showModalBottomSheet(
                     context: context,

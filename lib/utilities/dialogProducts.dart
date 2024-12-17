@@ -1,7 +1,7 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:odooapp/api/apiAccessOdoo.dart';
+import 'package:odooapp/api/apiAccess.dart';
 
 class DialogHelpersProducts {
   static void showAddProductDialog(

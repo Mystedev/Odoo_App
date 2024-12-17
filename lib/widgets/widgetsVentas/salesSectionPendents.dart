@@ -46,6 +46,7 @@ class SalesSection extends StatelessWidget {
                   ? () => onSaleLongPress!(sale)
                   : null,
               child: Card(
+                color: Colors.grey[100],
                 margin: const EdgeInsets.symmetric(vertical: 8.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

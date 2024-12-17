@@ -1,7 +1,7 @@
 // ignore_for_file: null_argument_to_non_null_type, use_build_context_synchronously, unused_field
 
 import 'package:flutter/material.dart';
-import 'package:odooapp/api/apiAccessOdoo.dart';
+import 'package:odooapp/api/apiAccess.dart';
 import 'package:odooapp/utilities/salesHelpers.dart';
 
 class MySalesOdoo extends StatefulWidget {

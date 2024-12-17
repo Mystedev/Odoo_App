@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, unused_local_variable, no_leading_underscores_for_local_identifiers, unused_element, deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:odooapp/api/apiAccessOdoo.dart';
+import 'package:odooapp/api/apiAccess.dart';
 
 class DialogHelpersContacts {
   // Función para mostrar el cuadro de diálogo de agregar contacto

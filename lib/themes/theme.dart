@@ -50,16 +50,9 @@ final ThemeData darkTheme = ThemeData(
     50: Color(0xFF1A2D37),
     100: Color(0xFF16272E),
     200: Color(0xFF112125),
-    300: Color(0xFF0D1B1D),
-    400: Color(0xFF091519),
-    500: Color(0xFF061012),
-    600: Color(0xFF050E0F),
-    700: Color(0xFF040B0C),
-    800: Color(0xFF03090A),
-    900: Color(0xFF020607),
   }),
   brightness: Brightness.dark,
-  scaffoldBackgroundColor: const Color.fromARGB(255, 35, 35, 35), // Fondo oscuro
+  scaffoldBackgroundColor: const Color.fromARGB(255, 39, 39, 39), // Fondo oscuro
   appBarTheme: const AppBarTheme(
     backgroundColor: Color(0xFF00344D), // Azul oscuro del tema claro adaptado
     titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
