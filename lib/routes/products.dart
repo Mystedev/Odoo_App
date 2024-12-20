@@ -124,22 +124,29 @@ class _MyProductsState extends State<MyProducts> {
       ),
       floatingActionButton: SpeedDial(
         icon: Icons.more_horiz,
-        activeIcon: Icons.close,
-        buttonSize: const Size(20, 60),
+        activeIcon: Icons.close,  
         visible: true,
         curve: Curves.bounceIn,
+        buttonSize: const Size(65,65),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),  
+        ),
         children: [
           SpeedDialChild(
+              backgroundColor:const Color(0xFFE0F7FA),
               child: const Icon(Icons.add_shopping_cart),
               label: 'Add',
+              labelStyle: const TextStyle(fontSize: 18, color: Colors.black),
               onTap: () => DialogHelpersProducts.showAddProductDialog(
                   context, fetchApi)),
           SpeedDialChild(
+            backgroundColor: const Color(0xFFE0F7FA),
               child: const Icon(Icons.remove_shopping_cart),
               label: 'Delete',
               onTap: () => DialogHelpersProducts.showDeleteProductDialog(
                   context, _productsFuture, fetchApi)),
           SpeedDialChild(
+              backgroundColor:const Color(0xFFE0F7FA) ,
               child: const Icon(Icons.manage_history),
               label: 'Update',
               onTap: () => DialogHelpersProducts.showUpdateProductDialog(

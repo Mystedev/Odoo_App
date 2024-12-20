@@ -1,6 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api, unused_field, prefer_final_fields, unused_element
-
-import 'dart:async';
+// ignore_for_file: library_private_types_in_public_api, unused_field, prefer_final_fields, unused_element, unnecessary_import
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:odooapp/HomeScreen.dart';
@@ -70,8 +68,8 @@ class _MainAppState extends State<MainApp> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Autenticación correcta...'),
-                    backgroundColor: Color.fromARGB(255, 33, 144, 131),
+                    content: Text('Obteniendo datos...'),
+                    backgroundColor: Color.fromARGB(255, 56, 129, 122),
                   ),
                 );
               });

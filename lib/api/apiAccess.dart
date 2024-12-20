@@ -154,8 +154,7 @@ class ApiFetch {
     }
   }
 
-  static Future<void> addContact(
-      String name, String email, String phone) async {
+  static Future<void> addContact(String name, String email, String phone) async {
     final url = Uri.parse('http://10.0.2.2:8069/web/dataset/call_kw');
 
     final response = await http.post(
@@ -309,7 +308,7 @@ class ApiFetch {
           },
         },
       }),
-    );
+    ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

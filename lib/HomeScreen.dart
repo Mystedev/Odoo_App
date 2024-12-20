@@ -40,29 +40,27 @@ class HomeScreen extends StatelessWidget {
         ),
         drawer: Drawer(
           width: 230,
+          backgroundColor: isDarkMode? const Color.fromARGB(255, 24, 24, 24) : const Color.fromARGB(255, 242, 251, 252),
+          shape: Border.all(
+            color: Colors.transparent,
+          ),
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
-              DrawerHeader(
+              Container(
+                height: 80,
                 decoration: BoxDecoration(
-                  color: isDarkMode
-                      ? const Color(0xFF00344D)
-                      : const Color(0xFF004C6E),
+                  color: isDarkMode? const Color(0xFF00838F) : const Color(0xFF00838F),
                 ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Odoo DB',
-                      style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white),
-                    ),
-                    Icon(Icons.dashboard, size: 50, color: Colors.white),
-                  ],
+                child: const Padding(
+                  padding: EdgeInsets.only(left: 50,top: 30),
+                  child: Text(
+                    'Odoo App',
+                    style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white, fontSize: 25),
+                  ),
                 ),
               ),
+              const SizedBox(height: 10,),
               ListTile(
                 leading: const Icon(Icons.shop),
                 title: const Text('Productos'),
@@ -101,11 +99,11 @@ class HomeScreen extends StatelessWidget {
         ),
         body: const Center(
           child: Text(
-            'Odoo DB',
+            'Dashboard',
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w700,
-              color: Color.fromARGB(255, 23, 48, 95),
+              color: Color(0xFF006064),
             ),
           ),
         ));

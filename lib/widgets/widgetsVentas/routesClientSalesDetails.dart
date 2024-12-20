@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 
 class ClientSalesModal extends StatelessWidget {
@@ -28,7 +30,11 @@ class ClientSalesModal extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final sale = sales[index];
                     return Card(
-                      color: Colors.blueGrey[100],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(color: Colors.grey),
+                      ),
+                      elevation: 1.0,
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: ListTile(
                         leading: const Icon(Icons.receipt, color: Colors.blue),
@@ -45,8 +51,6 @@ class ClientSalesModal extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context); // Cerrar el Modal
               },
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
               child: const Text('Cerrar'),
             ),
           ],

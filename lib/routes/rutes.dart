@@ -88,7 +88,6 @@ class _MyRoutesState extends State<MyRoutes> {
                   }
                   final contactDetails = contactsSnapshot.data!;
                   return Card(
-                    color: Colors.grey[100],
                     margin: const EdgeInsets.all(8),
                     elevation: 4,
                     shadowColor: Colors.black,

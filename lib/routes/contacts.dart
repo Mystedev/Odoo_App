@@ -151,20 +151,29 @@ class _MyEmployeesState extends State<MyEmployees> {
       floatingActionButton: SpeedDial(
         icon: Icons.more_horiz,
         activeIcon: Icons.close,
+        visible: true,
+        curve: Curves.bounceIn,
+        buttonSize: const Size(65,65),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),  
+        ),
         children: [
           SpeedDialChild(
+            backgroundColor:const  Color(0xFFE0F7FA),
             child: const Icon(Icons.person_add),
             label: 'Add',
             onTap: () =>
                 DialogHelpersContacts.showAddContactDialog(context, fetchApi),
           ),
           SpeedDialChild(
+            backgroundColor:const  Color(0xFFE0F7FA),
             child: const Icon(Icons.no_accounts_sharp),
             label: 'Delete',
             onTap: () => DialogHelpersContacts.showDeleteContactDialog(
                 context, ApiFetch.fetchContacts, _contactsFuture,fetchApi),
           ),
           SpeedDialChild(
+            backgroundColor:const  Color(0xFFE0F7FA),
             child: const Icon(Icons.manage_accounts),
             label: 'Update contact',
             onTap: () => DialogHelpersContacts.showUpdateContactDialog(context, _contactsFuture, fetchApi)
